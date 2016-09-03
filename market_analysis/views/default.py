@@ -5,15 +5,25 @@ from sqlalchemy.exc import DBAPIError
 
 from ..models import MyModel
 
+import requests
 
-@view_config(route_name='home', renderer='../templates/mytemplate.jinja2')
-def my_view(request):
-    try:
-        query = request.dbsession.query(MyModel)
-        one = query.filter(MyModel.name == 'one').first()
-    except DBAPIError:
-        return Response(db_err_msg, content_type='text/plain', status=500)
-    return {'one': one, 'project': 'market-analysis'}
+
+@view_config(route_name='home_test', renderer='../templates/home_page_test.jinja2')
+def home_test(request):
+    return {}
+
+
+@view_config(route_name='single_stock_info_test', renderer='../templates/single_stock_info_test.jinja2')
+def single_stock_info_test(request):
+    resp = requests.get('http://dev.markitondemand.com/Api/v2/Quote/json?symbol=AAPL')
+    if resp.status_code == 200:
+        entry = {}
+        for key, value in resp.json().items():
+            entry[key] = value
+    else:
+        print('Error connecting to API')
+        print(resp.status_code)
+    return {'entry': entry}
 
 
 db_err_msg = """\
