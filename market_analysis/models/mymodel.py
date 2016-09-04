@@ -22,7 +22,8 @@ class Users(Base):
     date_joined = Column(DateTime)
     date_last_logged = Column(DateTime)
     pass_hash = Column(Unicode)
-    value = Column(Integer)
-
+    phone_number = Column(Unicode)
+    phone_number_verified = Column(Unicode)
+    active = Column(Boolean)
 
 # Index('my_index', Users.username, unique=True, mysql_length=255)
