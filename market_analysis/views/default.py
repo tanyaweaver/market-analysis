@@ -4,6 +4,7 @@ from pyramid.view import view_config
 from sqlalchemy.exc import DBAPIError
 
 from ..models import MyModel
+from urllib.parse import urlencode
 
 import requests
 
@@ -24,6 +25,60 @@ def single_stock_info_test(request):
         print('Error connecting to API')
         print(resp.status_code)
     return {'entry': entry}
+
+@view_config(route_name='graph_demo', renderer='../templates/graphs.jinja2')
+def graph_demo(request):
+    url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
+    elements = [
+        {
+            'Symbol': 'GOOGL',
+            'Type': 'price',
+            'Params': ['c'],
+        },
+        {
+            'Symbol': 'AAPL',
+            'Type': 'price',
+            'Params': ['c'],
+        }
+    ]
+    req_obj = {
+        "parameters":
+        {
+            'Normalized': 'false',
+            'NumberOfDays': 7,
+            'DataPeriod': 'Day',
+            'Elements': elements
+        }
+    }
+
+    resp = requests.get(url, params=urlencode(req_obj))
+
+    if resp.status_code == 200:
+        entries = {}
+        for key, value in resp.json().items():
+            entries[key] = value
+
+        # build export dict for template
+        export = {}
+        export['dates'] = entries['Dates']
+        export['x_values'] = entries['Positions']
+
+        stocks = {}
+        for series in entries['Elements']:
+            stocks[series['Symbol']] = {
+                'y_values': series['DataSeries']['close']['values'],
+                'currency': series['Currency'],
+                'max': series['DataSeries']['close']['max'],
+                'min': series['DataSeries']['close']['min'],
+
+            }
+        export['stocks'] = stocks
+        print(export)
+        return {'entry': export}
+
+    else:
+        print('Error connecting to API')
+        print(resp.status_code)
 
 
 db_err_msg = """\
