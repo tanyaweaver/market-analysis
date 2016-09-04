@@ -2,8 +2,8 @@ from pyramid.response import Response
 from pyramid.view import view_config
 
 from sqlalchemy.exc import DBAPIError
-
-from ..models import MyModel
+from pyramid.httpexceptions import HTTPFound
+from ..models import Users
 
 import requests
 
@@ -11,6 +11,26 @@ import requests
 @view_config(route_name='home_test', renderer='../templates/home_page_test.jinja2')
 def home_test(request):
     return {}
+
+@view_config(route_name='logout')
+def logout(request):
+    headers = forget(request)
+    return HTTPFound(request.route_url('home'), headers=headers)
+
+
+# TODO: if there is a login failure give a message, and stay here
+@view_config(route_name='login', renderer='templates/login.jinja2')
+def login(request):
+    # if request.method == 'POST':
+    #     username = request.params.get('username', '')
+    #     password = request.params.get('password', '')
+    #     if check_credentials(username, password):
+    #         headers = remember(request, username)
+    #         return HTTPFound(location=request.route_url('home'),
+    #                          headers=headers)
+    #     else:
+    #         return {'error': "Username or Password Not Recognized"}
+    return {'error': ''}
 
 
 @view_config(route_name='single_stock_info_test', renderer='../templates/single_stock_info_test.jinja2')
