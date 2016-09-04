@@ -14,15 +14,39 @@ STOCKS = [
 ]
 
 
-@view_config(route_name='home_test', renderer='../templates/home_page_test.jinja2')
+@view_config(route_name='home_test',
+             renderer='../templates/home_page_test.jinja2')
 def home_test(request):
     return {}
 
 
-@view_config(route_name='home', renderer="../templates/home.jinja2")
-def home(request):
-
+@view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2")
+def portfolio(request):
+    '''The main user portfolio page, displays a list of their stocks and other
+       cool stuff'''
     return {'stocks': STOCKS}
+
+
+@view_config(route_name='search', renderer="../templates/search.jinja2")
+def search(request):
+    '''A Search page that allows a user to search for a stock
+        and provide a way to add stock to there portfolio'''
+    return {'Search page'}
+
+
+@view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
+def userinfo(request):
+    '''A page to display a users information to the user and allow them to
+        change and update it, or removethemselves from the list of users'''
+    return {'User info page'}
+
+
+@view_config(route_name='admin', renderer="../templates/admin.jinja2")
+def admin(request):
+    '''A page to display a users information to the site adimn and allow
+        them to change and update user information, or remove user'''
+    return {'Adimin Info Page'}
+
 
 
 @view_config(route_name='logout')
