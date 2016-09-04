@@ -25,5 +25,7 @@ class Users(Base):
     phone_number = Column(Unicode)
     phone_number_verified = Column(Unicode)
     active = Column(Boolean)
+    password_last_changed = Column(DateTime)
+    password_expired = Column(Boolean)
 
 # Index('my_index', Users.username, unique=True, mysql_length=255)
