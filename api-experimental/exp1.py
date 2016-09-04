@@ -2,13 +2,18 @@
 
 Markit on demand.
 http://dev.markitondemand.com/MODApis/
---> has search (LookUp), prices(Quote) with other data like change from 
+--> has search (LookUp), prices(Quote) with other data like change from
 yesterday, and graphs(InteractiveChart).
 """
 
 import requests
+from urllib.parse import urlencode
+
 
 def get_response_from_markit():
+
+    # example to use Lookup
+    print('Searching for AAPL...')
     resp = requests.get('http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=AAP')
     if resp.status_code == 200:
         print('Content when searching for "AAP":')
@@ -16,39 +21,6 @@ def get_response_from_markit():
         print('Grabbing results to show it in a readable form...')
         for result in resp.json():
             print('{} {} {}'.format(result['Exchange'], result['Name'], result['Symbol']))
-
-<<<<<<< HEAD
-# example to use the search
-print('Searching for AAP...')
-resp = requests.get('http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=AAP')
-if resp.status_code == 200:
-    print('Content when searching for "AAP":')
-    print(resp.content)
-    print('Grabbing results to show it in a readable form...')
-    for result in resp.json():
-        print('{} {} {}'.format(result['Exchange'], result['Name'], result['Symbol']))
-
-else:
-    print('Error connecting to API')
-    print(resp.status_code)
-
-print('')
-print('-=' * 30)
-print('')
-
-# example to use Quote
-print('Getting quote info for AAPL')
-resp = requests.get('http://dev.markitondemand.com/Api/v2/Quote/json?symbol=AAPL')
-if resp.status_code == 200:
-    print('Content when getting a quote for AAPL:')
-    print(resp.content)
-    print('Grabbing results to show it in a readable form...')
-    for key, value in resp.json().items():
-        print('{} : {}'.format(key, value))
-else:
-    print('Error connecting to API')
-    print(resp.status_code)
-=======
     else:
         print('Error connecting to API')
         print(resp.status_code)
@@ -68,13 +40,89 @@ else:
         for key, value in resp.json().items():
             entries[key] = value
         for key in entries:
-            print(key + ':' , entries[key])
+            print(key + ':', entries[key])
+    else:
+        print('Error connecting to API')
+        print(resp.status_code)
+
+    print('')
+    print('-=' * 30)
+    print('')
+
+    # example chart, using Google and Apple for 5 days
+
+    url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
+    elements = [
+        {
+            'Symbol': 'GOOGL',
+            'Type': 'price',
+            'Params': ['c'],
+        },
+        {
+            'Symbol': 'AAPL',
+            'Type': 'price',
+            'Params': ['c'],
+        }
+    ]
+
+    req_obj = {
+        "parameters":
+        {
+            'Normalized': 'false',
+            'NumberOfDays': 5,
+            'DataPeriod': 'Day',
+            'Elements': elements
+        }
+    }
+
+    resp = requests.get(url, params=urlencode(req_obj))
+
+    print(resp.content)
+    print('')
+    print(resp.url)
+
+    if resp.status_code == 200:
+        print('Content when getting chart info for AAPL:')
+        print(resp.content)
+        print('')
+        print('Grabbing results to show it in a readable form...')
+        entries = {}
+        for key, value in resp.json().items():
+            entries[key] = value
+        for key in entries:
+            print(key + ':', entries[key])
+
+        print('')
+        print('Here is the entries dict returned:')
+        print(entries)
+
+        # package data up for easy graph implementation
+        export = {}
+        export['dates'] = entries['Dates']
+        export['x_values'] = entries['Positions']
+        print('')
+        print('series:')
+        for series in entries['Elements']:
+            print(series)
+            print(series['DataSeries'])
+            print(series['Symbol'])
+            print(series['DataSeries']['close'])
+            export[series['Symbol']] = {
+                'y_values': series['DataSeries']['close']['values'],
+                'currency': series['Currency'],
+                'max': series['DataSeries']['close']['max'],
+                'min': series['DataSeries']['close']['min'],
+
+            }
+
+        print('')
+        print('export dict:')
+        print(export)
+
     else:
         print('Error connecting to API')
         print(resp.status_code)
 
 
 if __name__ == '__main__':
-    print('Searching for AAPL...')
     get_response_from_markit()
->>>>>>> staging
