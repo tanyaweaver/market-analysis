@@ -1,0 +1,30 @@
+{% extends "layout.jinja2" %}
+{% block body %}
+
+    <!-- <div class="jumbotron"> -->
+      <h4>home.jinja2</h4>
+      <h2>This is the User Home View</h2>
+      <p>User stocks will be listed here. The list will be populated from a postgres database.</p>
+
+      <table class="table table-inverse">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Symbol</th>
+            <th>Value</th>
+            <th></th>
+          </tr>
+        </thead>
+          <tbody>
+            {% for stock in stocks %}
+              <tr>
+                <th scope="row">{{ stock.id }}</th>
+                <td><a href="{{request.route_url('home',id=stock.id)}}"><bold>{{ stock.symbol }}</bold></a></td>
+                <td>{{ stock.value }}</td>
+                <td>EDIT BUTTON</td>
+              </tr>
+            {% endfor %}
+          </table>
+    <!-- </dir> -->
+
+{% endblock %}
