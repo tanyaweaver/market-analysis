@@ -45,7 +45,7 @@ def graph_demo(request):
         "parameters":
         {
             'Normalized': 'false',
-            'NumberOfDays': 5,
+            'NumberOfDays': 7,
             'DataPeriod': 'Day',
             'Elements': elements
         }
@@ -62,6 +62,7 @@ def graph_demo(request):
         export = {}
         export['dates'] = entries['Dates']
         export['x_values'] = entries['Positions']
+
         stocks = {}
         for series in entries['Elements']:
             stocks[series['Symbol']] = {

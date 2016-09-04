@@ -118,6 +118,11 @@ def get_response_from_markit():
         print('export dict:')
         print(export)
 
+        # build graph
+        import matplotlib.pyplot as plt, mpld3
+        plot = plt.plot([3, 1, 4, 1, 5], 'ks-', mec='w', mew=5, ms=20)
+        mpld3.fig_to_html(plot)
+
     else:
         print('Error connecting to API')
         print(resp.status_code)
