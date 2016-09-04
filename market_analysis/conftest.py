@@ -52,16 +52,13 @@ def populated_db(request, sqlengine):
 
     with transaction.manager:
         session.add(Users(title='title: Day 1', body='This is a body',
-                            date=datetime.datetime.now()))
+                          date=datetime.datetime.now()))
         session.flush()
     def teardown():
         with transaction.manager:
             session.query(Users).delete()
 
     request.addfinalizer(teardown)
-
-
-
 
 
 DB_SETTINGS = {'sqlalchemy.url': 'sqlite:///:memory:'}
@@ -71,7 +68,7 @@ DB_SETTINGS = {'sqlalchemy.url': 'sqlite:///:memory:'}
 @pytest.fixture()
 def app():
     '''testapp fixture'''
-    from learing_journal import main
+    from market_analysis import main
     app = main({}, **DB_SETTINGS)
     from webtest import TestApp
     return TestApp(app)

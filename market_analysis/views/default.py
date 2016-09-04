@@ -3,14 +3,27 @@ from pyramid.view import view_config
 
 from sqlalchemy.exc import DBAPIError
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import remember, forget
 from ..models import Users
 
 import requests
+
+STOCKS = {
+    {'id': 1, 'symbol': 'MSFT', 'value': 123.55},
+    {'id': 2, 'symbol': 'AMZN', 'value': 745.27},
+}
 
 
 @view_config(route_name='home_test', renderer='../templates/home_page_test.jinja2')
 def home_test(request):
     return {}
+
+
+@view_config(route_name='home', renderer="../templates/home.jinja2")
+def home(request):
+
+    return {'stocks': STOCKS}
+
 
 @view_config(route_name='logout')
 def logout(request):
