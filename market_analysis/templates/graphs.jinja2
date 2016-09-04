@@ -1,0 +1,14 @@
+{% extends "layout.jinja2" %}
+  {% block body %}
+
+
+         <article class="single-entry">
+            <h5>Dates: {{ entry.dates }}</h5>
+            <h5>X-values: {{ entry.x_values }}</h5>
+            {% for stock, val in entry.stocks.items() %}
+                <h5>{{ stock }}:{{ val.y_values }}</h5>
+            {% endfor %}
+          
+         </article>
+
+  {% endblock %}

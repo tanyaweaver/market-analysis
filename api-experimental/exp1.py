@@ -18,6 +18,7 @@ def get_response_from_markit():
     if resp.status_code == 200:
         print('Content when searching for "AAP":')
         print(resp.content)
+        print('')
         print('Grabbing results to show it in a readable form...')
         for result in resp.json():
             print('{} {} {}'.format(result['Exchange'], result['Name'], result['Symbol']))
@@ -35,6 +36,7 @@ def get_response_from_markit():
     if resp.status_code == 200:
         print('Content when getting a quote for AAPL:')
         print(resp.content)
+        print('')
         print('Grabbing results to show it in a readable form...')
         entries = {}
         for key, value in resp.json().items():
@@ -49,7 +51,7 @@ def get_response_from_markit():
     print('-=' * 30)
     print('')
 
-    # example chart, using Google and Apple for 5 days
+    # example chart, using Google and Apple for 5 days, closing price
 
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
     elements = [
@@ -77,20 +79,17 @@ def get_response_from_markit():
 
     resp = requests.get(url, params=urlencode(req_obj))
 
-    print(resp.content)
+    print('Getting chart data for Apple and Google...')
     print('')
-    print(resp.url)
 
     if resp.status_code == 200:
-        print('Content when getting chart info for AAPL:')
+        print('Content when getting chart info for AAPL and GOOGL:')
         print(resp.content)
         print('')
         print('Grabbing results to show it in a readable form...')
         entries = {}
         for key, value in resp.json().items():
             entries[key] = value
-        for key in entries:
-            print(key + ':', entries[key])
 
         print('')
         print('Here is the entries dict returned:')
@@ -100,14 +99,13 @@ def get_response_from_markit():
         export = {}
         export['dates'] = entries['Dates']
         export['x_values'] = entries['Positions']
+
         print('')
         print('series:')
+        stocks = {}
         for series in entries['Elements']:
             print(series)
-            print(series['DataSeries'])
-            print(series['Symbol'])
-            print(series['DataSeries']['close'])
-            export[series['Symbol']] = {
+            stocks[series['Symbol']] = {
                 'y_values': series['DataSeries']['close']['values'],
                 'currency': series['Currency'],
                 'max': series['DataSeries']['close']['max'],
@@ -115,6 +113,7 @@ def get_response_from_markit():
 
             }
 
+        export['stocks'] = stocks
         print('')
         print('export dict:')
         print(export)
