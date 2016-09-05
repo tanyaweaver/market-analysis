@@ -5,13 +5,72 @@ from sqlalchemy.exc import DBAPIError
 
 from ..models import MyModel
 from urllib.parse import urlencode
+from pyramid.httpexceptions import HTTPFound
+from pyramid.security import remember, forget
+from ..models import Users
 
 import requests
 
+STOCKS = [
+    {'id': 1, 'symbol': 'MSFT', 'value': 123.55},
+    {'id': 2, 'symbol': 'AMZN', 'value': 745.27},
+]
 
-@view_config(route_name='home_test', renderer='../templates/home_page_test.jinja2')
+
+@view_config(route_name='home_test',
+             renderer='../templates/home_page_test.jinja2')
 def home_test(request):
     return {}
+
+
+@view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2")
+def portfolio(request):
+    '''The main user portfolio page, displays a list of their stocks and other
+       cool stuff'''
+    return {'stocks': STOCKS}
+
+
+@view_config(route_name='search', renderer="../templates/search.jinja2")
+def search(request):
+    '''A Search page that allows a user to search for a stock
+        and provide a way to add stock to there portfolio'''
+    return {'message': 'Search page'}
+
+
+@view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
+def userinfo(request):
+    '''A page to display a users information to the user and allow them to
+        change and update it, or removethemselves from the list of users'''
+    return {'message': 'User info page'}
+
+
+@view_config(route_name='admin', renderer="../templates/admin.jinja2")
+def admin(request):
+    '''A page to display a users information to the site adimn and allow
+        them to change and update user information, or remove user'''
+    return {'message': 'Adimin Info Page'}
+
+
+
+@view_config(route_name='logout')
+def logout(request):
+    headers = forget(request)
+    return HTTPFound(request.route_url('search'), headers=headers)
+
+
+# TODO: if there is a login failure give a message, and stay here
+@view_config(route_name='login', renderer='templates/login.jinja2')
+def login(request):
+    # if request.method == 'POST':
+    #     username = request.params.get('username', '')
+    #     password = request.params.get('password', '')
+    #     if check_credentials(username, password):
+    #         headers = remember(request, username)
+    #         return HTTPFound(location=request.route_url('home'),
+    #                          headers=headers)
+    #     else:
+    #         return {'error': "Username or Password Not Recognized"}
+    return {'error': ''}
 
 
 @view_config(route_name='single_stock_info_test', renderer='../templates/single_stock_info_test.jinja2')
