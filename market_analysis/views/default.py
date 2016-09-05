@@ -3,7 +3,7 @@ from pyramid.view import view_config
 
 from sqlalchemy.exc import DBAPIError
 
-from ..models import MyModel
+# from ..models import MyModel
 from urllib.parse import urlencode
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
