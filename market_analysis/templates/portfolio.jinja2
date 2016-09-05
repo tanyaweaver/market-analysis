@@ -4,7 +4,7 @@
     <!-- <div class="jumbotron"> -->
       <h4>home.jinja2</h4>
       <h2>This is the User Home View</h2>
-      <p>User stocks will be listed here. The list will be populated from a postgres database.</p>
+      <p>User stocks and portfolio information will be listed here. The list will be populated from a postgres database.</p>
 
       <table class="table table-inverse">
         <thead>
@@ -12,6 +12,8 @@
             <th>#</th>
             <th>Symbol</th>
             <th>Value</th>
+            <th>Shares</th>
+            <th>% of Portfolio</th>
             <th></th>
           </tr>
         </thead>
@@ -19,8 +21,10 @@
             {% for stock in stocks %}
               <tr>
                 <th scope="row">{{ stock.id }}</th>
-                <td><a href="{{request.route_url('home',id=stock.id)}}"><bold>{{ stock.symbol }}</bold></a></td>
+                <td><a href="{{request.route_url('portfolio',id=stock.id)}}"><bold>{{ stock.symbol }}</bold></a></td>
                 <td>{{ stock.value }}</td>
+                <td>{{ stock.shars }}</td>
+                <td>{{ stock.precent }}</td>
                 <td>EDIT BUTTON</td>
               </tr>
             {% endfor %}

@@ -31,28 +31,28 @@ def portfolio(request):
 def search(request):
     '''A Search page that allows a user to search for a stock
         and provide a way to add stock to there portfolio'''
-    return {'Search page'}
+    return {'message': 'Search page'}
 
 
 @view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
 def userinfo(request):
     '''A page to display a users information to the user and allow them to
         change and update it, or removethemselves from the list of users'''
-    return {'User info page'}
+    return {'message': 'User info page'}
 
 
 @view_config(route_name='admin', renderer="../templates/admin.jinja2")
 def admin(request):
     '''A page to display a users information to the site adimn and allow
         them to change and update user information, or remove user'''
-    return {'Adimin Info Page'}
+    return {'message': 'Adimin Info Page'}
 
 
 
 @view_config(route_name='logout')
 def logout(request):
     headers = forget(request)
-    return HTTPFound(request.route_url('home'), headers=headers)
+    return HTTPFound(request.route_url('search'), headers=headers)
 
 
 # TODO: if there is a login failure give a message, and stay here
