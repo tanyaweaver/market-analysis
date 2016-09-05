@@ -5,19 +5,26 @@
         <br>
         <br>
         <br>
-         <article class="single-entry">
-              <h5>Name: {{ entry.Name }}</h5>
-              <h5>Symbol: {{ entry.Symbol }}</h5>
-              <h5>LastPrice: {{ entry.LastPrice }}</h5>
-              <h5>High: {{ entry.High }}</h5>
-              <h5>Low: {{ entry.Low }}</h5>
-              <h5>ChangePercent: {{ entry.ChangePercent }}</h5>
-              <h5>Open: {{ entry.Open }}</h5>
-              <h5>Volume: {{ entry.Volume }}</h5>
-              <h5>MarketCap: {{ entry.MarketCap }}</h5>
-              <h5>ChangePercentYTD: {{ entry.ChangePercentYTD }}</h5>
+        {% if not entry.error %}
+        <article class="single-entry">
+          <h5>Name: {{ entry.Name }}</h5>
+          <h5>Symbol: {{ entry.Symbol }}</h5>
+          <h5>LastPrice: {{ entry.LastPrice }}</h5>
+          <h5>High: {{ entry.High }}</h5>
+          <h5>Low: {{ entry.Low }}</h5>
+          <h5>ChangePercent: {{ entry.ChangePercent }}</h5>
+          <h5>Open: {{ entry.Open }}</h5>
+          <h5>Volume: {{ entry.Volume }}</h5>
+          <h5>MarketCap: {{ entry.MarketCap }}</h5>
+          <h5>ChangePercentYTD: {{ entry.ChangePercentYTD }}</h5>
+        </article>
+        {% endif %}
 
-         </article>
+        {% if entry.error %}
+        <h3>There was an error.</h3>
+        <h4>{{ entry.error }} - Remove this later.</h4>
+        {% endif %}
+
 
 
 

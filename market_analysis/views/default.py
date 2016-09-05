@@ -15,6 +15,7 @@ STOCKS = [
     {'id': 2, 'symbol': 'AMZN', 'value': 745.27},
 ]
 
+
 @view_config(route_name='search_test', renderer='../templates/search_page_test.jinja2')
 def search_test(request):
     msg = 'Hi!'
@@ -42,6 +43,8 @@ def search_test(request):
 def add_test(request):
     msg = 'The stock was added to your portfolio.'
     return {'msg': msg}
+
+
 @view_config(route_name='home_test',
              renderer='../templates/home_page_test.jinja2')
 def home_test(request):
@@ -54,13 +57,18 @@ def portfolio(request):
        cool stuff'''
     return {'stocks': STOCKS}
 
+
 @view_config(route_name='details', renderer="../templates/details.jinja2")
 def details(request):
     """Details for single-stock."""
     sym = request.matchdict['sym']
     resp = requests.get('http://dev.markitondemand.com/Api/v2/Quote/json?symbol=' + sym)
-    entries = {key: value for key, value in resp.json().items()}
-    return {'entry': entries}
+    if resp.status_code == 200:
+        entries = {key: value for key, value in resp.json().items()}
+        return {'entry': entries}
+    else:
+        return {''}
+
 
 @view_config(route_name='search', renderer="../templates/search.jinja2")
 def search(request):
@@ -80,8 +88,7 @@ def userinfo(request):
 def admin(request):
     '''A page to display a users information to the site adimn and allow
         them to change and update user information, or remove user'''
-    return {'message': 'Adimin Info Page'}
-
+    return {'message': 'Admin Info Page'}
 
 
 @view_config(route_name='logout')
@@ -109,13 +116,13 @@ def login(request):
 def single_stock_info_test(request):
     resp = requests.get('http://dev.markitondemand.com/Api/v2/Quote/json?symbol=AAPL')
     if resp.status_code == 200:
-        entry = {}
+        entry = {'error': False}
         for key, value in resp.json().items():
             entry[key] = value
     else:
         print('Error connecting to API')
         print(resp.status_code)
-    return {'entry': entry}
+    return {'error': resp.status_code}
 
 @view_config(route_name='graph_demo', renderer='../templates/graphs.jinja2')
 def graph_demo(request):
