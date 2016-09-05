@@ -48,8 +48,12 @@ def userinfo(request):
 def admin(request):
     '''A page to display a users information to the site adimn and allow
         them to change and update user information, or remove user'''
-    return {'message': 'Adimin Info Page'}
-
+    try:
+        query = request.dbsession.query(Users)
+        users = query.all()
+    except DBAPIError:
+        return Response(db_err_msg, content_type='text/plain', status=500)
+    return {'users': users, 'messages': {}}
 
 
 @view_config(route_name='logout')

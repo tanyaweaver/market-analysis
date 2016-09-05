@@ -1,5 +1,5 @@
 body {
-  min-height: 2000px;
+  min-height: 500px;
   /*color: red;*/
   font-family: 'Muli', sans-serif;
   /*font-family: 'Orbitron', sans-serif;*/
@@ -7,8 +7,14 @@ body {
   /*font-family: Verdana, sans-serif;*/
   /*color: blue;*/
   background-color: #ccccb3;
+  width: 100%;
 }
 
 .navbar-static-top {
   margin-bottom: 19px;
+}
+
+.table table-inverse {
+  width: 90%;
+
 }
