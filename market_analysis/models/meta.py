@@ -12,5 +12,6 @@ NAMING_CONVENTION = {
     "pk": "pk_%(table_name)s"
 }
 
-metadata = MetaData(naming_convention=NAMING_CONVENTION)
-Base = declarative_base(metadata=metadata)
+#metadata = MetaData(naming_convention=NAMING_CONVENTION)
+#Base = declarative_base(metadata=metadata)
+Base = declarative_base()
