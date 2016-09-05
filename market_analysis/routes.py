@@ -9,3 +9,4 @@ def includeme(config):
     config.add_route('search', '/search')
     config.add_route('userinfo', '/userinfo')
     config.add_route('admin', '/admin')
+    config.add_route('private', '/private')

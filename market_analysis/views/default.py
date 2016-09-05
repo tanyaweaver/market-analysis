@@ -17,6 +17,13 @@ STOCKS = [
 ]
 
 
+@view_config(route_name='private',
+             renderer='string',
+             permission ='secret')
+def private(request):
+    return "I'm a private view."
+
+
 @view_config(route_name='home_test',
              renderer='../templates/home_page_test.jinja2')
 def home_test(request):
