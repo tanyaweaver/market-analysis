@@ -19,9 +19,15 @@ STOCKS = [
 
 @view_config(route_name='private',
              renderer='string',
-             permission ='secret')
+             permission='secret')
 def private(request):
     return "I'm a private view."
+
+
+@view_config(route_name='public', renderer='string',
+             permission='view')
+def pubic(request):
+    return "I'm a public page"
 
 
 @view_config(route_name='home_test',
