@@ -16,6 +16,7 @@ from ..models import (
     get_tm_session,
     )
 from ..models import Users
+from .fake_users import FAKEUSERS
 
 
 def usage(argv):
@@ -33,13 +34,27 @@ def main(argv=sys.argv):
     setup_logging(config_uri)
     settings = get_appsettings(config_uri, options=options)
 
-    # engine = get_engine(settings)
-    # Base.metadata.create_all(engine)
+    engine = get_engine(settings)
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
 
-    # session_factory = get_session_factory(engine)
+    session_factory = get_session_factory(engine)
 
-    # with transaction.manager:
-    #     dbsession = get_tm_session(session_factory, transaction.manager)
-
-    #     model = MyModel(name='one', value=1)
-    #     dbsession.add(model)
+    with transaction.manager:
+        dbsession = get_tm_session(session_factory, transaction.manager)
+        for line in FAKEUSERS:
+            user =  Users(username=line[username],
+                          first_name=line[first_name],
+                          last_name=line[last_name],
+                          email=line[email],
+                          email_verified=line[email_verified],
+                          date_joined=line[date_joined],
+                          date_last_logged=line[date_last_logged],
+                          pass_hash=line[pass_hash],
+                          phone_number=line[phone_number],
+                          phone_number_verified=line[phone_number_verified],
+                          active=line[active],
+                          password_last_changed=line[password_last_changed],
+                          password_expired=line[password_expired],
+                          )
+            dbsession.add(user)
