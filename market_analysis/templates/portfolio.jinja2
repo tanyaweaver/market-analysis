@@ -21,7 +21,7 @@
             {% for stock in stocks %}
               <tr>
                 <th scope="row">{{ stock.id }}</th>
-                <td><a href="{{request.route_url('portfolio',id=stock.id)}}"><bold>{{ stock.symbol }}</bold></a></td>
+                <td><a href="/details/{{ stock.symbol }}"><bold>{{ stock.symbol }}</bold></a></td>
                 <td>{{ stock.value }}</td>
                 <td>{{ stock.shars }}</td>
                 <td>{{ stock.precent }}</td>

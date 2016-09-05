@@ -1,6 +1,7 @@
 def includeme(config):
     # config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('portfolio', '/')
+    config.add_route('details', '/details/{sym}')
     config.add_route('home_test', '/test')
     config.add_route('search_test', '/search_test')
     config.add_route('add_test', '/add_test')

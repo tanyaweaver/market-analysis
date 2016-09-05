@@ -54,6 +54,13 @@ def portfolio(request):
        cool stuff'''
     return {'stocks': STOCKS}
 
+@view_config(route_name='details', renderer="../templates/details.jinja2")
+def details(request):
+    """Details for single-stock."""
+    sym = request.matchdict['sym']
+    resp = requests.get('http://dev.markitondemand.com/Api/v2/Quote/json?symbol=' + sym)
+    entries = {key: value for key, value in resp.json().items()}
+    return {'entry': entries}
 
 @view_config(route_name='search', renderer="../templates/search.jinja2")
 def search(request):
