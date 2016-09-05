@@ -16,9 +16,9 @@ from sqlalchemy.orm import relationship
 
 class Association(Base):
     __tablename__ = 'association'
-    #id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
-    stock_id = Column(Integer, ForeignKey('stocks.id'), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    stock_id = Column(Integer, ForeignKey('stocks.id'))
     shares = Column(Integer)
     child = relationship('Stocks')
 
