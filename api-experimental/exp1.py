@@ -14,7 +14,7 @@ def get_response_from_markit():
 
     # example to use Lookup
     print('Searching for AAPL...')
-    resp = requests.get('http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=AAP')
+    resp = requests.get('http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=B')
     if resp.status_code == 200:
         print('Content when searching for "AAP":')
         print(resp.content)
@@ -52,7 +52,6 @@ def get_response_from_markit():
     print('')
 
     # example chart, using Google and Apple for 5 days, closing price
-
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
     elements = [
         {
@@ -66,12 +65,11 @@ def get_response_from_markit():
             'Params': ['c'],
         }
     ]
-
     req_obj = {
         "parameters":
         {
             'Normalized': 'false',
-            'NumberOfDays': 5,
+            'NumberOfDays': 7,
             'DataPeriod': 'Day',
             'Elements': elements
         }
@@ -79,32 +77,18 @@ def get_response_from_markit():
 
     resp = requests.get(url, params=urlencode(req_obj))
 
-    print('Getting chart data for Apple and Google...')
-    print('')
-
     if resp.status_code == 200:
-        print('Content when getting chart info for AAPL and GOOGL:')
-        print(resp.content)
-        print('')
-        print('Grabbing results to show it in a readable form...')
         entries = {}
         for key, value in resp.json().items():
             entries[key] = value
 
-        print('')
-        print('Here is the entries dict returned:')
-        print(entries)
-
-        # package data up for easy graph implementation
+        # build export dict for template
         export = {}
         export['dates'] = entries['Dates']
         export['x_values'] = entries['Positions']
 
-        print('')
-        print('series:')
         stocks = {}
         for series in entries['Elements']:
-            print(series)
             stocks[series['Symbol']] = {
                 'y_values': series['DataSeries']['close']['values'],
                 'currency': series['Currency'],
@@ -112,16 +96,9 @@ def get_response_from_markit():
                 'min': series['DataSeries']['close']['min'],
 
             }
-
         export['stocks'] = stocks
-        print('')
-        print('export dict:')
         print(export)
-
-        # build graph
-        import matplotlib.pyplot as plt, mpld3
-        plot = plt.plot([3, 1, 4, 1, 5], 'ks-', mec='w', mew=5, ms=20)
-        mpld3.fig_to_html(plot)
+        return {'entry': export}
 
     else:
         print('Error connecting to API')
