@@ -23,8 +23,8 @@
               
               <h3>{{ stock.symbol }} {{ stock.name }}</h3>
 
-              <form action="{{ request.route_url('add_test') }}" method="POST">
-              <input class="button" type=submit value="Add"/>
+              <form action="/add_test/{{stock.name}}/{{stock.id}}" method="POST">
+              <input class="button" type=submit name="add_button" value="Add"/>
               </form>
               
          </article>
