@@ -3,11 +3,10 @@ from pyramid.view import view_config
 
 from sqlalchemy.exc import DBAPIError
 
-#from ..models import MyModel
+from ..models import Stocks, Users, Association
 from urllib.parse import urlencode
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
-from ..models import Users
 
 import requests
 
@@ -16,7 +15,33 @@ STOCKS = [
     {'id': 2, 'symbol': 'AMZN', 'value': 745.27},
 ]
 
+@view_config(route_name='search_test', renderer='../templates/search_page_test.jinja2')
+def search_test(request):
+    msg = 'Hi!'
+    try:
+        query = request.dbsession.query(Stocks)
+        stocks = query.all()
+    except DBAPIError:
+        return Response(db_err_msg, content_type='text/plain', status=500)
+    if request.method == 'GET':
+        return {'stocks': stocks[:10], 'msg': msg}
+    elif request.method == 'POST':
+        search_results = []
+        for stock in stocks:
+            search_name = request.params.get('search')
+            search_query = request.dbsession.query(Stocks)\
+                .filter(Stocks.name.startswith(search_name.lower().capitalize()))
+        for row in search_query:
+            search_results.append(row)
+        if len(search_results) == 0:
+            msg = 'No results found, try again.'
+        return {'stocks': search_results, 'msg': msg}
 
+
+@view_config(route_name='add_test', renderer='../templates/search_page_test.jinja2')
+def add_test(request):
+    msg = 'The stock was added to your portfolio.'
+    return {'msg': msg}
 @view_config(route_name='home_test',
              renderer='../templates/home_page_test.jinja2')
 def home_test(request):
