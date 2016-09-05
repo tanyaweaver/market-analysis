@@ -1,23 +1,25 @@
 from pyramid.response import Response
 from pyramid.view import view_config
-
+from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.exc import DBAPIError
 
 from ..models import Stocks, Users, Association
 from urllib.parse import urlencode
-from pyramid.httpexceptions import HTTPFound
+
 from pyramid.security import remember, forget
 
 import requests
+#import pdb; pdb.set_trace()
 
 STOCKS = [
     {'id': 1, 'symbol': 'MSFT', 'value': 123.55},
     {'id': 2, 'symbol': 'AMZN', 'value': 745.27},
 ]
 
+
 @view_config(route_name='search_test', renderer='../templates/search_page_test.jinja2')
 def search_test(request):
-    msg = 'Hi!'
+    msg = ''
     try:
         query = request.dbsession.query(Stocks)
         stocks = query.all()
@@ -38,10 +40,24 @@ def search_test(request):
         return {'stocks': search_results, 'msg': msg}
 
 
-@view_config(route_name='add_test', renderer='../templates/search_page_test.jinja2')
+@view_config(route_name='add_test', renderer='../templates/add_page_test.jinja2')
 def add_test(request):
-    msg = 'The stock was added to your portfolio.'
-    return {'msg': msg}
+    if request.method == 'POST':
+        msg = request.matchdict['name'] + '\nwas added to your portfolio.'
+        user_id = 1
+        new_user_id = user_id
+        new_stock_id = request.matchdict['id']   
+        association_row = Association(user_id=new_user_id, stock_id=new_stock_id)
+        query = request.dbsession.query(Association).filter(Association.user_id == user_id)
+        list_of_stock_ids = []
+        for row in query:
+            list_of_stock_ids.append(row.stock_id)
+        print(list_of_stock_ids)
+        if int(new_stock_id) not in list_of_stock_ids:
+            request.dbsession.add(association_row) 
+        return {'msg': msg}
+
+
 @view_config(route_name='home_test',
              renderer='../templates/home_page_test.jinja2')
 def home_test(request):
@@ -74,7 +90,6 @@ def admin(request):
     '''A page to display a users information to the site adimn and allow
         them to change and update user information, or remove user'''
     return {'message': 'Adimin Info Page'}
-
 
 
 @view_config(route_name='logout')
