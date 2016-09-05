@@ -8,11 +8,18 @@ from sqlalchemy import (
 from .meta import Base
 
 
-class MyModel(Base):
-    __tablename__ = 'models'
+class Stocks(Base):
+    __tablename__ = 'stocks'
     id = Column(Integer, primary_key=True)
+    symbol = Column(Text)
     name = Column(Text)
-    value = Column(Integer)
 
 
-Index('my_index', MyModel.name, unique=True, mysql_length=255)
+# class User_stocks(Base):
+#     __tablename__ = 'user_stocks'
+#     id = Column(Integer, primary_key=True)
+#     user = Column(Text)
+#     stock = Column(Text)
+
+
+Index('my_index', Stocks.name, mysql_length=255)

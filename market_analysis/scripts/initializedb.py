@@ -15,7 +15,9 @@ from ..models import (
     get_session_factory,
     get_tm_session,
     )
-from ..models import MyModel
+from ..models import Stocks
+from market_analysis.scripts.nasdaq_top_hundred import STOCKS_100
+
 
 
 def usage(argv):
@@ -40,6 +42,6 @@ def main(argv=sys.argv):
 
     # with transaction.manager:
     #     dbsession = get_tm_session(session_factory, transaction.manager)
-
-    #     model = MyModel(name='one', value=1)
-    #     dbsession.add(model)
+    #     for line in STOCKS_100:
+    #         stock = Stocks(symbol=line[0], name=line[1])
+    #         dbsession.add(stock)
