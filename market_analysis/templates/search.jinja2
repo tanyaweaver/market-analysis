@@ -1,0 +1,35 @@
+{% extends "layout.jinja2" %}
+{% block body %}
+
+  <div class="jumbotron">
+    <h2>search.jinja2</h2>
+    <p>Provide a search bar and other fun stuff</p>
+
+      {% if error %}
+        <div class="alert alert-danger" role="alert">{{ error }}</div>
+      {% endif %}
+
+    <div>
+        <div class="col-lg-6">
+          <div class="input-group">
+            <input action="{{ request.route_url('portfolio') }}" method="POST" type="text" class="form-control" placeholder="Stock Symbol">
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button">Search</button>
+            </span>
+          </div><!-- /input-group -->
+        </div><!-- /.col-lg-6 -->
+
+        <p>Show the Add To Portfolio button one a stock has been picked</p>
+
+        <div class="col-lg-6">
+          <div class="input-group">
+            <input action="{{ request.route_url('portfolio') }}" method="POST" type="text" class="form-control" placeholder="# of Shares">
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button">Add To Portfolio</button>
+            </span>
+          </div><!-- /input-group -->
+        </div><!-- /.col-lg-6 -->
+      <p>Provide information for searched stock</p>
+    </div>
+
+{% endblock %}
