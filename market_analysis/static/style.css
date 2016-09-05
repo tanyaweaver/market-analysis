@@ -14,7 +14,7 @@ body {
   margin-bottom: 19px;
 }
 
-.table table-inverse {
-  width: 90%;
+# admin_table {
+  font-size: 10px;
 
 }
