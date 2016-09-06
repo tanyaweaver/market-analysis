@@ -22,8 +22,9 @@ def search(request):
     except DBAPIError:
         return Response(db_err_msg, content_type='text/plain', status=500)
     if request.method == 'GET':
-        print('get method hit')
-        return {'stocks': stocks[:10], 'msg': msg}
+        # print('get method hit')
+        # return {'stocks': stocks[:10], 'msg': msg}
+        return {}
     elif request.method == 'POST':
         print('post method hit')
         search_results = []
@@ -109,13 +110,6 @@ def details(request):
         return {'entry': entries}
     else:
         return {''}
-
-
-@view_config(route_name='search', renderer="../templates/search.jinja2")
-def search(request):
-    '''A Search page that allows a user to search for a stock
-        and provide a way to add stock to there portfolio'''
-    return {'message': 'Search page'}
 
 
 @view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
