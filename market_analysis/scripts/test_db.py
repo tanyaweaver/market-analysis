@@ -5,7 +5,6 @@ STOCKS_100 = [
     ['ADBE', 'Adobe Systems Incorporated'],
     ['AKAM', 'Akamai Technologies, Inc.'],
     ['ALXN', 'Alexion Pharmaceuticals, Inc.'],
-    ['GOOG', 'Alphabet Inc.'],
     ['GOOGL', 'Alphabet Inc.'],
     ['AMZN', 'Amazon.com, Inc.'],
     ['AAL', 'American Airlines Group, Inc.'],

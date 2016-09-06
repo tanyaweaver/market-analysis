@@ -10,16 +10,11 @@ from urllib.parse import urlencode
 from pyramid.security import remember, forget
 
 import requests
-#import pdb; pdb.set_trace()
-
-STOCKS = [
-    {'id': 1, 'symbol': 'MSFT', 'value': 123.55},
-    {'id': 2, 'symbol': 'AMZN', 'value': 745.27},
-]
 
 
-@view_config(route_name='search_test', renderer='../templates/search_page_test.jinja2')
-def search_test(request):
+@view_config(route_name='search', renderer='../templates/search.jinja2')
+def search(request):
+    print('search function hit')
     msg = ''
     try:
         query = request.dbsession.query(Stocks)
@@ -27,8 +22,10 @@ def search_test(request):
     except DBAPIError:
         return Response(db_err_msg, content_type='text/plain', status=500)
     if request.method == 'GET':
+        print('get method hit')
         return {'stocks': stocks[:10], 'msg': msg}
     elif request.method == 'POST':
+        print('post method hit')
         search_results = []
         for stock in stocks:
             search_name = request.params.get('search')
