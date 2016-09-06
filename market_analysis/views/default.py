@@ -5,7 +5,10 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy import and_
 
 from ..models import Stocks, Users, Association
-from urllib.parse import urlencode
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
 
 from pyramid.security import remember, forget
 
@@ -41,7 +44,7 @@ def add(request):
         msg = request.matchdict['name'] + '\nwas added to your portfolio.'
         user_id = 1
         new_user_id = user_id
-        new_stock_id = request.matchdict['id']   
+        new_stock_id = request.matchdict['id']
         association_row = Association(user_id=new_user_id, stock_id=new_stock_id)
         query = request.dbsession.query(Association).filter(Association.user_id == user_id)
         list_of_stock_ids = []
@@ -85,7 +88,7 @@ def portfolio(request):
 
     elements = []
     for stock in list_of_stock_ids:
-        elements.append({'Symbol': stock, 'Type': 'price', 'Params': ['c']})
+        elements.append({'Symbol': str(stock), 'Type': 'price', 'Params': ['c']})
 
     return build_graph(request, elements)
 
@@ -157,6 +160,8 @@ def build_graph(request, elements):
 
         # build export dict for template
         export = {}
+        print(entries)
+
         export['dates'] = entries['Dates']
         export['x_values'] = entries['Positions']
 
