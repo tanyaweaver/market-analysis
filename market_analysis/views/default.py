@@ -14,7 +14,6 @@ import requests
 
 @view_config(route_name='search', renderer='../templates/search.jinja2')
 def search(request):
-    print('search function hit')
     msg = ''
     try:
         query = request.dbsession.query(Stocks)
@@ -22,10 +21,8 @@ def search(request):
     except DBAPIError:
         return Response(db_err_msg, content_type='text/plain', status=500)
     if request.method == 'GET':
-        print('get method hit')
-        return {'stocks': stocks[:10], 'msg': msg}
+        return {}
     elif request.method == 'POST':
-        print('post method hit')
         search_results = []
         for stock in stocks:
             search_name = request.params.get('search')
@@ -38,8 +35,8 @@ def search(request):
         return {'stocks': search_results, 'msg': msg}
 
 
-@view_config(route_name='add_test', renderer='../templates/add_page_test.jinja2')
-def add_test(request):
+@view_config(route_name='add', renderer='../templates/add_page.jinja2')
+def add(request):
     if request.method == 'POST':
         msg = request.matchdict['name'] + '\nwas added to your portfolio.'
         user_id = 1
@@ -56,8 +53,8 @@ def add_test(request):
         return {'msg': msg}
 
 
-@view_config(route_name='delete_test', renderer='../templates/delete_page_test.jinja2')
-def delete_test(request):
+@view_config(route_name='delete', renderer='../templates/delete_page.jinja2')
+def delete(request):
     if request.method == 'POST':
         user_id = 1
         new_user_id = user_id
@@ -71,12 +68,6 @@ def delete_test(request):
     else:
         msg = 'Failed to remove.' 
     return {'msg': msg}
-
-
-@view_config(route_name='home_test',
-             renderer='../templates/home_page_test.jinja2')
-def home_test(request):
-    return {}
 
 
 @view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2")
@@ -111,13 +102,6 @@ def details(request):
         return {''}
 
 
-@view_config(route_name='search', renderer="../templates/search.jinja2")
-def search(request):
-    '''A Search page that allows a user to search for a stock
-        and provide a way to add stock to there portfolio'''
-    return {'message': 'Search page'}
-
-
 @view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
 def userinfo(request):
     '''A page to display a users information to the user and allow them to
@@ -150,19 +134,6 @@ def login(request):
     #     else:
     #         return {'error': "Username or Password Not Recognized"}
     return {'error': ''}
-
-
-@view_config(route_name='single_stock_info_test', renderer='../templates/single_stock_info_test.jinja2')
-def single_stock_info_test(request):
-    resp = requests.get('http://dev.markitondemand.com/Api/v2/Quote/json?symbol=AAPL')
-    if resp.status_code == 200:
-        entry = {'error': False}
-        for key, value in resp.json().items():
-            entry[key] = value
-    else:
-        print('Error connecting to API')
-        print(resp.status_code)
-    return {'error': resp.status_code}
 
 
 def build_graph(request, elements):

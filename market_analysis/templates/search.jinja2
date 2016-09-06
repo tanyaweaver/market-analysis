@@ -1,9 +1,12 @@
 {% extends "layout.jinja2" %}
 {% block body %}
-
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
   <div class="jumbotron">
-    <h2>search.jinja2</h2>
-    <p>Provide a search bar and other fun stuff</p>
 
       {% if error %}
         <div class="alert alert-danger" role="alert">{{ error }}</div>
@@ -12,38 +15,31 @@
     <div>
         <div class="col-lg-6">
           <div class="input-group">
+
           <form action="{{ request.route_url('search') }}" method="POST">
-            <input class="search_input" type="text" name="search"/>
-{#             <span class="input-group-btn"> #}
-              <input class="btn btn-default" type="submit" value="Search"/>
-              {# </span> #}
+                    <input class="search_input" type="text" name="search"/>
+                    <input class="btn btn-default" type="submit" value="Search"/>
           </form>
+
+          <h3>{{ msg }}</h3>
+
+           {% for stock in stocks %}
+              <article class="single-stock">
+                  
+                      
+
+                      <form action="/add/{{stock.name}}/{{stock.id}}" method="POST">
+                                   <label for="add_button">{{ stock.symbol }} {{ stock.name }}</label>
+                                  <input class="btn btn-default" type=submit name="add_button" value="Add"/>
+                      </form>
+                  
+               </article>
+            {% endfor %}
+          
           </div><!-- /input-group -->
         </div><!-- /.col-lg-6 -->
 
-       {#  <p>Show the Add To Portfolio button one a stock has been picked</p> #}
-
-{#         <div class="col-lg-6">
-          <div class="input-group">
-            <input action="{{ request.route_url('portfolio') }}" method="POST" type="text" class="form-control" placeholder="# of Shares">
-            <span class="input-group-btn">
-              <button class="btn btn-default" type="button">Add To Portfolio</button>
-            </span>
-          </div><!-- /input-group -->
-        </div><!-- /.col-lg-6 --> #}
-{#       <p>Provide information for searched stock</p> #}
-    <h3>{{ msg }}</h3>
-    {% for stock in stocks %}
-        <article class="single-stock">
-              
-              <h3>{{ stock.symbol }} {{ stock.name }}</h3>
-
-              <form action="/add_test/{{stock.name}}/{{stock.id}}" method="POST">
-              <input class="button" type=submit name="add_button" value="Add"/>
-              </form>
-              
-         </article>
-      {% endfor %}
+       </div>
     </div>
-
+    
 {% endblock %}
