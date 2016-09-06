@@ -70,12 +70,6 @@ def delete(request):
     return {'msg': msg}
 
 
-@view_config(route_name='home_test',
-             renderer='../templates/home_page_test.jinja2')
-def home_test(request):
-    return {}
-
-
 @view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2")
 def portfolio(request):
     '''The main user portfolio page, displays a list of their stocks and other
@@ -140,19 +134,6 @@ def login(request):
     #     else:
     #         return {'error': "Username or Password Not Recognized"}
     return {'error': ''}
-
-
-@view_config(route_name='single_stock_info_test', renderer='../templates/single_stock_info_test.jinja2')
-def single_stock_info_test(request):
-    resp = requests.get('http://dev.markitondemand.com/Api/v2/Quote/json?symbol=AAPL')
-    if resp.status_code == 200:
-        entry = {'error': False}
-        for key, value in resp.json().items():
-            entry[key] = value
-    else:
-        print('Error connecting to API')
-        print(resp.status_code)
-    return {'error': resp.status_code}
 
 
 def build_graph(request, elements):
