@@ -18,17 +18,71 @@
           </tr>
         </thead>
           <tbody>
-            {% for stock in stocks %}
+            {% for stock in entry.stocks %}
               <tr>
                 <th scope="row">{{ stock.id }}</th>
-                <td><a href="/details/{{ stock.symbol }}"><bold>{{ stock.symbol }}</bold></a></td>
-                <td>{{ stock.value }}</td>
-                <td>{{ stock.shars }}</td>
-                <td>{{ stock.precent }}</td>
+                <td><a href="/details/{{ stock }}"><bold>{{ stock }}</bold></a></td>
+                <td>{{ entry.stocks[stock].y_values[-1] }}</td>
+                <td></td>
+                <td></td>
                 <td>EDIT BUTTON</td>
               </tr>
             {% endfor %}
           </table>
     <!-- </dir> -->
+        <article class="single-entry">
+       <h5>Dates: {{ entry.dates }}</h5>
+       <h5>X-values: {{ entry.x_values }}</h5>
+        {% for stock, val in entry.stocks.items() %}
+            <h5>{{ stock }}:{{ val.y_values }}</h5>
+        {% endfor %}
+    </article>
+    
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {packages: ['corechart', 'line']});
+        google.charts.setOnLoadCallback(drawCrosshairs);
+
+    function drawCrosshairs() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'X');
+    {% for stock in entry.stocks %}
+      data.addColumn('number', '{{ stock }}');
+    {% endfor %}
+      rowData = [];
+    {% for date in entry.dates %}
+      rowData.push(['{{ date }}']);
+    {% endfor %}
+
+    for (i = 0; i < rowData.length; i++) {
+        {% for stock, val in entry.stocks.items() %}
+            rowData[i].push({{val.y_values}}[i]);
+        {% endfor %}
+    };
+    data.addRows(rowData)
+
+      var options = {
+        hAxis: {
+          title: 'Time'
+        },
+        vAxis: {
+          title: 'Price'
+        },
+        pointSize: 10,
+        crosshair: {
+          color: '#000',
+          trigger: 'selection'
+        }
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+      chart.draw(data, options);
+      chart.setSelection([{row: 38, column: 1}]);
+
+    }
+    </script>
+    
+    <div id="chart_div"></div>
 
 {% endblock %}
