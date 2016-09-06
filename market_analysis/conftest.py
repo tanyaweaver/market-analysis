@@ -55,7 +55,7 @@ def new_session_scope_session(sqlengine, request):
     user = Users(username='fake', pass_hash=pwd_context.encrypt('fake'))
     dbsession.add(user)
     dbsession.flush()
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
 
     def teardown():
         transaction.abort()

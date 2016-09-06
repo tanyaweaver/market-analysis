@@ -44,7 +44,7 @@ def check_credentials(request, username, password):
     try:
         query = request.dbsession.query(Users)
         user_data = query.filter_by(username=username).first()
-        stored_password = user_data['pass_hash']
+        stored_password = user_data.pass_hash
     except DBAPIError:
         return is_auth
     if stored_password:
