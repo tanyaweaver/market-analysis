@@ -124,8 +124,8 @@ def new_user(request):
         if result:
             message = 'User "{}" already exists.'.format(username)
         else:
-            if username != '' and password != '' and password_verify != '' and \
-               first_name != '' and last_name != '' and email != '':
+            if username != '' and password != '' and password_verify != ''\
+               and first_name != '' and last_name != '' and email != '':
 
                 if (password == password_verify) and (len(password) > 6):
                     message = "good job, you can enter info"
