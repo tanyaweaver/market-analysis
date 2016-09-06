@@ -14,7 +14,6 @@ import requests
 
 @view_config(route_name='search', renderer='../templates/search.jinja2')
 def search(request):
-    print('search function hit')
     msg = ''
     try:
         query = request.dbsession.query(Stocks)
@@ -22,11 +21,8 @@ def search(request):
     except DBAPIError:
         return Response(db_err_msg, content_type='text/plain', status=500)
     if request.method == 'GET':
-        # print('get method hit')
-        # return {'stocks': stocks[:10], 'msg': msg}
         return {}
     elif request.method == 'POST':
-        print('post method hit')
         search_results = []
         for stock in stocks:
             search_name = request.params.get('search')
@@ -39,8 +35,8 @@ def search(request):
         return {'stocks': search_results, 'msg': msg}
 
 
-@view_config(route_name='add_test', renderer='../templates/add_page_test.jinja2')
-def add_test(request):
+@view_config(route_name='add', renderer='../templates/add_page.jinja2')
+def add(request):
     if request.method == 'POST':
         msg = request.matchdict['name'] + '\nwas added to your portfolio.'
         user_id = 1
