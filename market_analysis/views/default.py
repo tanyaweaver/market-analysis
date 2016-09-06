@@ -88,6 +88,12 @@ def login(request):
         # import pdb; pdb.set_trace()
         if check_credentials(request, username, password):
             headers = remember(request, username)
+            try:
+                query = request.dbsession.query(Users)
+                user = query.filter_by(username=username).first()
+                user.date_last_logged = datetime.datetime.now()
+            except DBAPIError:
+                return Response(db_err_msg, content_type='text/plain', status=500)
             return HTTPFound(location=request.route_url('portfolio'),
                              headers=headers)
         else:
@@ -109,34 +115,44 @@ def new_user(request):
         phone_number = request.POST['phone_number']
         email = request.POST['email']
 
-        if username != '' and password != '' and password_verify != '' and \
-           first_name != '' and last_name != '' and email != '':
+        try:
+            query = request.dbsession.query(Users)
+            result = query.filter_by(username=username).first()
+        except DBAPIError:
+            return Response(db_err_msg, content_type='text/plain', status=500)
 
-            if password == password_verify:
-                message = "good job, you can enter info"
-                date_joined = datetime.datetime.now()
-                date_last_logged = datetime.datetime.now()
-                new = Users(
-                    username=username,
-                    first_name=first_name,
-                    last_name=last_name,
-                    email=email,
-                    email_verified=0,
-                    date_joined=date_joined,
-                    date_last_logged=date_last_logged,
-                    pass_hash=pwd_context.encrypt(password),
-                    phone_number=phone_number,
-                    phone_number_verified=0,
-                    active=1,
-                    password_last_changed=datetime.datetime.now(),
-                    password_expired=1,
-                )
-                request.dbsession.add(new)
-                return HTTPFound(location=request.route_url('admin'))
-            else:
-                error = 'Passwords do not match'
+        if result:
+            message = 'User "{}" already exists.'.format(username)
         else:
-            error = 'Missing Required Fields'
+            if username != '' and password != '' and password_verify != '' and \
+               first_name != '' and last_name != '' and email != '':
+
+                if (password == password_verify) and (len(password) > 6):
+                    message = "good job, you can enter info"
+                    date_joined = datetime.datetime.now()
+                    date_last_logged = datetime.datetime.now()
+                    new = Users(
+                        username=username,
+                        first_name=first_name,
+                        last_name=last_name,
+                        email=email,
+                        email_verified=0,
+                        date_joined=date_joined,
+                        date_last_logged=date_last_logged,
+                        pass_hash=pwd_context.encrypt(password),
+                        phone_number=phone_number,
+                        phone_number_verified=0,
+                        active=1,
+                        password_last_changed=datetime.datetime.now(),
+                        password_expired=1,
+                    )
+                    request.dbsession.add(new)
+                    return HTTPFound(location=request.route_url('admin'))
+                else:
+                    error = 'Passwords do not match or password \
+                             is less then 6 characters'
+            else:
+                error = 'Missing Required Fields'
 
     return {'error': error, 'username': username, 'first_name': first_name,
             'last_name': last_name, 'phone_number': phone_number,
