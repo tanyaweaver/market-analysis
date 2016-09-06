@@ -5,6 +5,7 @@ def includeme(config):
     config.add_route('home_test', '/test')
     config.add_route('search_test', '/search_test')
     config.add_route('add_test', '/add_test/{name}/{id}')
+    config.add_route('delete_test', '/delete_test/{sym}')
     config.add_route('single_stock_info_test', '/single_stock_info_test')
     config.add_route('graph_demo', '/graph_demo')
     config.add_route('login', '/login')

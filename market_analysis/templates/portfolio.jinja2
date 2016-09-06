@@ -25,7 +25,11 @@
                 <td>{{ entry.stocks[stock].y_values[-1] }}</td>
                 <td></td>
                 <td></td>
-                <td>EDIT BUTTON</td>
+                <td>
+                        <form action="/delete_test/{{stock}}" method="POST">
+                        <input class="button" type=submit name="delete_button" value="Delete"/>
+                        </form>
+                  </td>
               </tr>
             {% endfor %}
           </table>

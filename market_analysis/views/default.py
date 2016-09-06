@@ -2,6 +2,7 @@ from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.exc import DBAPIError
+from sqlalchemy import and_
 
 from ..models import Stocks, Users, Association
 from urllib.parse import urlencode
@@ -56,6 +57,23 @@ def add_test(request):
         if int(new_stock_id) not in list_of_stock_ids:
             request.dbsession.add(association_row) 
         return {'msg': msg}
+
+
+@view_config(route_name='delete_test', renderer='../templates/delete_page_test.jinja2')
+def delete_test(request):
+    if request.method == 'POST':
+        user_id = 1
+        new_user_id = user_id
+        new_stock_sym = request.matchdict['sym']  
+        query = request.dbsession.query(Stocks).filter(Stocks.symbol == new_stock_sym).first()
+        query_del=request.dbsession.query(Association)\
+            .filter(and_(Association.stock_id == query.id,
+            Association.user_id == new_user_id)).first()
+        request.dbsession.delete(query_del)
+        msg = request.matchdict['sym'] + '\nwas removed from your portfolio.'
+    else:
+        msg = 'Failed to remove.' 
+    return {'msg': msg}
 
 
 @view_config(route_name='home_test',
