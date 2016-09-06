@@ -80,7 +80,7 @@ def logout(request):
 @view_config(route_name='login', renderer='templates/login.jinja2')
 def login(request):
     if request.method == 'POST':
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         username = request.params.get('username', '')
         password = request.params.get('password', '')
@@ -96,7 +96,29 @@ def login(request):
 
 @view_config(route_name='new_user', renderer='templates/new_user.jinja2')
 def new_user(request):
-    return {'error': 'Welcome New User'}
+    username = password = password_verify = first_name = ''
+    last_name = phone_number = email = error = ''
+
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        password_verify = request.POST['password_verify']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        phone_number = request.POST['phone_number']
+        email = request.POST['email']
+
+        if username != '' and password != '' and password_verify != '' and \
+           first_name != '' and last_name != '' and email != '':
+
+
+        error = "good job, you can enter info"
+    else:
+        error = 'Missing Required Fields'
+
+    return {'error': error, 'username': username, 'first_name': first_name,
+            'last_name': last_name, 'phone_number': phone_number,
+            'email': email}
 
 
 @view_config(route_name='single_stock_info_test', renderer='../templates/single_stock_info_test.jinja2')
