@@ -14,15 +14,15 @@ def test_private_view(app):
     assert response.status_code == 403
 
 
-def test_user_db_exists(new_session_scope_function):
-    assert len(new_session_scope_function.query(Users).all()) == 0
+def test_user_db_exists(new_session):
+    assert len(new_session.query(Users).all()) == 0
 
 
-def test_user_gets_added_to_db(new_session_scope_function):
-    user = Users(username=USER_CREDENTIALS['username'], pass_hash='hashiehashhash')
-    new_session_scope_function.add(user)
-    new_session_scope_function.flush()
-    assert len(new_session_scope_function.query(Users).all()) == 1
+def test_user_gets_added_to_db(new_session):
+    user = Users(username=USER_CREDENTIALS['username'], pass_hash='hashiehas')
+    new_session.add(user)
+    new_session.flush()
+    assert len(new_session.query(Users).all()) == 1
 
 
 def test_login_view_is_public(app):
@@ -30,11 +30,11 @@ def test_login_view_is_public(app):
     assert response.status_code == 200
 
 
-def test_login_correct_user_info(app, one_user):
-    import pdb; pdb.set_trace()
+def test_login_correct_user_info(app, populated_db):
+    # import pdb; pdb.set_trace()
     auth_data = {'username': 'fake', 'password': 'fake'}
     response = app.post('/login', auth_data, status='3*')
-    assert response.status_code == 300
+    assert response.status_code == 302
 
 
 # def test_private_view_accessable_to_authenticated(authenticated_app):

@@ -1,5 +1,5 @@
 from webtest import TestApp as _Test_App
-# import os
+import os
 import pytest
 from pyramid import testing
 from .models import (
@@ -15,7 +15,9 @@ from .models.mymodel import Users
 from passlib.apps import custom_app_context as pwd_context
 
 
-DB_SETTINGS = {'sqlalchemy.url': 'postgres://banksd:@localhost:5432/testing'}
+OS_USER = os.environ.get('USER', 'banksd')
+
+DB_SETTINGS = {'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'.format(OS_USER)}
 
 
 @pytest.fixture(scope='session')
@@ -36,7 +38,7 @@ def sqlengine(request):
 
 
 @pytest.fixture(scope='function')
-def new_session_scope_function(sqlengine, request):
+def new_session(sqlengine, request):
     session_factory = get_session_factory(sqlengine)
     dbsession = get_tm_session(session_factory, transaction.manager)
 
@@ -48,43 +50,29 @@ def new_session_scope_function(sqlengine, request):
 
 
 @pytest.fixture(scope='session')
-def new_session_scope_session(sqlengine, request):
+def populated_db(sqlengine, request):
     session_factory = get_session_factory(sqlengine)
     dbsession = get_tm_session(session_factory, transaction.manager)
 
-    user = Users(username='fake', pass_hash=pwd_context.encrypt('fake'))
-    dbsession.add(user)
-    dbsession.flush()
-    # import pdb; pdb.set_trace()
+    with transaction.manager:
+        user = Users(
+            username=USER_CREDENTIALS['username'],
+            pass_hash=pwd_context.encrypt(USER_CREDENTIALS['password']))
+        dbsession.add(user)
+        # import pdb; pdb.set_trace()
 
     def teardown():
-        transaction.abort()
+        with transaction.manager:
+            dbsession.query(Users).delete()
 
     request.addfinalizer(teardown)
-    return dbsession
 
 
 USER_CREDENTIALS = {'username': 'fake', 'password': 'fake'}
 
 
-@pytest.fixture(scope='function')
-def one_user(sqlengine, request):
-    user = Users(username=USER_CREDENTIALS['username'],
-                 pass_hash=pwd_context.encrypt(USER_CREDENTIALS['password']))
-    session = get_session_factory(sqlengine)()
-    with transaction.manager:
-        session.add(user)
-
-    def teardown():
-        with transaction.manager:
-            session.query(Users).delete()
-
-    request.addfinalizer(teardown)
-    return session
-
-
 @pytest.fixture()
-def app(new_session_scope_session):
+def app():
     '''testapp fixture'''
     from market_analysis import main
     app = main({}, **DB_SETTINGS)
@@ -93,15 +81,10 @@ def app(new_session_scope_session):
 
 
 @pytest.fixture(scope="function")
-def authenticated_app(app, new_session):
-    user = Users(username='fake', pass_hash=pwd_context.encrypt('fake'))
-    new_session.add(user)
-    new_session.flush()
-    actual_username = 'fake'
-    actual_password = 'fake'
+def authenticated_app(app, populated_db):
     auth_data = {
-        'username': actual_username,
-        'password': actual_password,
+        'username': USER_CREDENTIALS['username'],
+        'password': USER_CREDENTIALS['password']
     }
     response = app.post('/login', auth_data, status='3*')
     return app
