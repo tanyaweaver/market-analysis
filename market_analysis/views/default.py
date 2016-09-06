@@ -8,6 +8,7 @@ from urllib.parse import urlencode
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 from ..models import Users
+from ..security import check_credentials
 
 import requests
 
@@ -78,15 +79,16 @@ def logout(request):
 # TODO: if there is a login failure give a message, and stay here
 @view_config(route_name='login', renderer='templates/login.jinja2')
 def login(request):
-    # if request.method == 'POST':
-    #     username = request.params.get('username', '')
-    #     password = request.params.get('password', '')
-    #     if check_credentials(username, password):
-    #         headers = remember(request, username)
-    #         return HTTPFound(location=request.route_url('home'),
-    #                          headers=headers)
-    #     else:
-    #         return {'error': "Username or Password Not Recognized"}
+    if request.method == 'POST':
+        username = request.params.get('username', '')
+        password = request.params.get('password', '')
+        # import pdb; pdb.set_trace()
+        if check_credentials(request, username, password):
+            headers = remember(request, username)
+            return HTTPFound(location=request.route_url('portfolio'),
+                             headers=headers)
+        else:
+            return {'error': "Username or Password Not Recognized"}
     return {'error': ''}
 
 
