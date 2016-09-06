@@ -15,7 +15,7 @@ from .models.mymodel import Users
 from passlib.apps import custom_app_context as pwd_context
 
 
-DB_SETTINGS = {'sqlalchemy.url': 'sqlite:///:memory:'}
+DB_SETTINGS = {'sqlalchemy.url': 'postgres://banksd:@localhost:5432/testing'}
 
 
 @pytest.fixture(scope='session')
@@ -62,6 +62,25 @@ def new_session_scope_session(sqlengine, request):
 
     request.addfinalizer(teardown)
     return dbsession
+
+
+USER_CREDENTIALS = {'username': 'fake', 'password': 'fake'}
+
+
+@pytest.fixture(scope='function')
+def one_user(sqlengine, request):
+    user = Users(username=USER_CREDENTIALS['username'],
+                 pass_hash=pwd_context.encrypt(USER_CREDENTIALS['password']))
+    session = get_session_factory(sqlengine)()
+    with transaction.manager:
+        session.add(user)
+
+    def teardown():
+        with transaction.manager:
+            session.query(Users).delete()
+
+    request.addfinalizer(teardown)
+    return session
 
 
 @pytest.fixture()

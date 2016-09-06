@@ -40,7 +40,7 @@ def includeme(config):
 
 def check_credentials(request, username, password):
     is_auth = False
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     try:
         query = request.dbsession.query(Users)
         user_data = query.filter_by(username=username).first()

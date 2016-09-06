@@ -80,6 +80,8 @@ def logout(request):
 @view_config(route_name='login', renderer='templates/login.jinja2')
 def login(request):
     if request.method == 'POST':
+        import pdb; pdb.set_trace()
+
         username = request.params.get('username', '')
         password = request.params.get('password', '')
         # import pdb; pdb.set_trace()
@@ -90,6 +92,11 @@ def login(request):
         else:
             return {'error': "Username or Password Not Recognized"}
     return {'error': ''}
+
+
+@view_config(route_name='new_user', renderer='templates/new_user.jinja2')
+def new_user(request):
+    return {'error': 'Welcome New User'}
 
 
 @view_config(route_name='single_stock_info_test', renderer='../templates/single_stock_info_test.jinja2')
