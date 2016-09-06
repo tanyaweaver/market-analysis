@@ -1,0 +1,18 @@
+body {
+  min-height: 2000px;
+  /*color: red;*/
+  font-family: 'Muli', sans-serif;
+  /*font-family: 'Orbitron', sans-serif;*/
+
+  /*font-family: Verdana, sans-serif;*/
+  /*color: blue;*/
+/*  background-color: white;*/
+}
+
+.navbar-static-top {
+  margin-bottom: 19px;
+}
+
+.container {
+    max-width: 900px;
+}

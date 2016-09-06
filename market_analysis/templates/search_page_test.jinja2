@@ -1,0 +1,35 @@
+{% extends "layout.jinja2" %}
+  {% block body %}
+
+
+      <form action="{{ request.route_url('search') }}" method="POST">
+
+              <div class="search">
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <input class="search_input" type="text" name="search"/>
+                    <input class="button" type=submit value="Search"/> 
+              </div>
+
+        </form>
+
+        <h3>{{ msg }}</h3>
+
+      {% for stock in stocks %}
+         <article class="single-stock">
+              
+              <h3>{{ stock.symbol }} {{ stock.name }}</h3>
+
+              <form action="/add_test/{{stock.name}}/{{stock.id}}" method="POST">
+              <input class="button" type=submit name="add_button" value="Add"/>
+              </form>
+              
+         </article>
+      {% endfor %}
+
+
+  {% endblock %}
+
