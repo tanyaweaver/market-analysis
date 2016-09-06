@@ -53,8 +53,8 @@ def add(request):
         return {'msg': msg}
 
 
-@view_config(route_name='delete_test', renderer='../templates/delete_page_test.jinja2')
-def delete_test(request):
+@view_config(route_name='delete', renderer='../templates/delete_page.jinja2')
+def delete(request):
     if request.method == 'POST':
         user_id = 1
         new_user_id = user_id
