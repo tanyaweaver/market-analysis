@@ -68,7 +68,20 @@ def home_test(request):
 def portfolio(request):
     '''The main user portfolio page, displays a list of their stocks and other
        cool stuff'''
-    return {'stocks': STOCKS}
+
+    user_id = 1
+    query = request.dbsession.query(Users).filter(Users.id == user_id).first()
+    query = query.children
+    list_of_stock_ids = []
+    for row in query:
+        list_of_stock_ids.append(row.child.symbol)
+    print(list_of_stock_ids)
+
+    elements = []
+    for stock in list_of_stock_ids:
+        elements.append({'Symbol': stock, 'Type': 'price', 'Params': ['c']})
+
+    return build_graph(request, elements)
 
 
 @view_config(route_name='details', renderer="../templates/details.jinja2")
@@ -136,21 +149,9 @@ def single_stock_info_test(request):
         print(resp.status_code)
     return {'error': resp.status_code}
 
-@view_config(route_name='graph_demo', renderer='../templates/graphs.jinja2')
-def graph_demo(request):
+
+def build_graph(request, elements):
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
-    elements = [
-        {
-            'Symbol': 'GOOGL',
-            'Type': 'price',
-            'Params': ['c'],
-        },
-        {
-            'Symbol': 'AAPL',
-            'Type': 'price',
-            'Params': ['c'],
-        }
-    ]
     req_obj = {
         "parameters":
         {
