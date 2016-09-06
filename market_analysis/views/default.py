@@ -18,19 +18,17 @@ import requests
 @view_config(route_name='search', renderer='../templates/search.jinja2')
 def search(request):
     msg = ''
-    try:
-        query = request.dbsession.query(Stocks)
-        stocks = query.all()
-    except DBAPIError:
-        return Response(db_err_msg, content_type='text/plain', status=500)
     if request.method == 'GET':
         return {}
     elif request.method == 'POST':
         search_results = []
-        for stock in stocks:
+        try:
             search_name = request.params.get('search')
             search_query = request.dbsession.query(Stocks)\
                 .filter(Stocks.name.startswith(search_name.lower().capitalize()))
+        except DBAPIError:
+            return Response(db_err_msg, content_type='text/plain', status=500)
+
         for row in search_query:
             search_results.append(row)
         if len(search_results) == 0:
