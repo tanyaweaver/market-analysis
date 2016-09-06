@@ -1,6 +1,5 @@
 from pyramid.response import Response
 from pyramid.view import view_config
-
 from sqlalchemy.exc import DBAPIError
 
 # from ..models import MyModel
@@ -9,7 +8,9 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 from ..models import Users
 from ..security import check_credentials
+from passlib.apps import custom_app_context as pwd_context
 
+import datetime
 import requests
 
 STOCKS = [
@@ -97,7 +98,7 @@ def login(request):
 @view_config(route_name='new_user', renderer='templates/new_user.jinja2')
 def new_user(request):
     username = password = password_verify = first_name = ''
-    last_name = phone_number = email = error = ''
+    last_name = phone_number = email = error = message = ''
 
     if request.method == 'POST':
         username = request.POST['username']
@@ -111,14 +112,35 @@ def new_user(request):
         if username != '' and password != '' and password_verify != '' and \
            first_name != '' and last_name != '' and email != '':
 
-
-        error = "good job, you can enter info"
-    else:
-        error = 'Missing Required Fields'
+            if password == password_verify:
+                message = "good job, you can enter info"
+                date_joined = datetime.datetime.now()
+                date_last_logged = datetime.datetime.now()
+                new = Users(
+                    username=username,
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    email_verified=0,
+                    date_joined=date_joined,
+                    date_last_logged=date_last_logged,
+                    pass_hash=pwd_context.encrypt(password),
+                    phone_number=phone_number,
+                    phone_number_verified=0,
+                    active=1,
+                    password_last_changed=datetime.datetime.now(),
+                    password_expired=1,
+                )
+                request.dbsession.add(new)
+                return HTTPFound(location=request.route_url('admin'))
+            else:
+                error = 'Passwords do not match'
+        else:
+            error = 'Missing Required Fields'
 
     return {'error': error, 'username': username, 'first_name': first_name,
             'last_name': last_name, 'phone_number': phone_number,
-            'email': email}
+            'email': email, 'message': message}
 
 
 @view_config(route_name='single_stock_info_test', renderer='../templates/single_stock_info_test.jinja2')
