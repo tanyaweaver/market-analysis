@@ -5,9 +5,12 @@ http://dev.markitondemand.com/MODApis/
 --> has search (LookUp), prices(Quote) with other data like change from
 yesterday, and graphs(InteractiveChart).
 """
-
+#from __future__ import unicode_literals
 import requests
-from urllib.parse import urlencode
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
 
 
 def get_response_from_markit():
@@ -81,11 +84,12 @@ def get_response_from_markit():
         entries = {}
         for key, value in resp.json().items():
             entries[key] = value
+        print(entries)
 
         # build export dict for template
         export = {}
-        export['dates'] = entries['Dates']
-        export['x_values'] = entries['Positions']
+        export['x_values'] = entries[u'Positions']
+        export['dates'] = entries[u'Dates']
 
         stocks = {}
         for series in entries['Elements']:
