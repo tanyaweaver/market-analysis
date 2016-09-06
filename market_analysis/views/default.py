@@ -16,7 +16,7 @@ import requests
 
 
 @view_config(route_name='search', renderer='../templates/search.jinja2')
-def search(request):
+def search_stocks(request):
     msg = ''
     if request.method == 'GET':
         return {}
@@ -37,9 +37,8 @@ def search(request):
 
 
 @view_config(route_name='add', renderer='../templates/add_page.jinja2')
-def add(request):
+def add_stock_to_portfolio(request):
     if request.method == 'POST':
-        msg = request.matchdict['name'] + '\nwas added to your portfolio.'
         user_id = 1
         new_user_id = user_id
         new_stock_id = request.matchdict['id']
@@ -50,7 +49,10 @@ def add(request):
             list_of_stock_ids.append(row.stock_id)
         print(list_of_stock_ids)
         if int(new_stock_id) not in list_of_stock_ids:
-            request.dbsession.add(association_row) 
+            request.dbsession.add(association_row)
+            msg = request.matchdict['name'] + ' was added to your portfolio.'
+        else:
+            msg = request.matchdict['name'] + ' is already in your portfolio.'
         return {'msg': msg}
 
 
