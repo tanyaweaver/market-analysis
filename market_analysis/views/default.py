@@ -299,7 +299,9 @@ def new_user(request):
                         is_admin=0,
                     )
                     request.dbsession.add(new)
-                    return HTTPFound(location=request.route_url('portfolio'))
+                    headers = remember(request, username)
+                    return HTTPFound(location=request.route_url('search'),
+                                     headers=headers)
                 else:
                     error = 'Passwords do not match or password'\
                             'is less then 6 characters'
