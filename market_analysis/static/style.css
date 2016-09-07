@@ -4,6 +4,10 @@ body {
   background-color: #ccccb3;
 }
 
+.bold {
+  font-weight: bold;
+}
+
 .navbar {
   color: black;
 }

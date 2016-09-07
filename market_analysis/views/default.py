@@ -220,7 +220,7 @@ def convert_to_percentage(y_vals):
     initial = y_vals[0]
     ret_list = []
     for val in y_vals:
-        val = val / initial - 1
+        val = round((val / initial - 1) * 100, 5)
         ret_list.append(val)
     return ret_list
 

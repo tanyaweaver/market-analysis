@@ -1,22 +1,17 @@
 {% extends "layout.jinja2" %}
   {% block body %}
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
         {% if not entry.error %}
         <article class="single-entry">
-          <h5>Name: {{ info.Name }}</h5>
-          <h5>Symbol: {{ info.Symbol }}</h5>
-          <h5>LastPrice: {{ info.LastPrice }}</h5>
-          <h5>High: {{ info.High }}</h5>
-          <h5>Low: {{ info.Low }}</h5>
-          <h5>ChangePercent: {{ info.ChangePercent }}</h5>
-          <h5>Open: {{ info.Open }}</h5>
-          <h5>Volume: {{ info.Volume }}</h5>
-          <h5>MarketCap: {{ info.MarketCap }}</h5>
-          <h5>ChangePercentYTD: {{ info.ChangePercentYTD }}</h5>
+          <h3>Name: {{ info.Name }}&nbsp;&nbsp;&nbsp;&nbsp;Symbol: {{ info.Symbol }}</h3>
+          <p><span class="bold">LastPrice:</span> {{ info.LastPrice }}&nbsp;&nbsp;
+            <span class="bold">Open:</span> {{ info.Open }}&nbsp;&nbsp;
+            <span class="bold">High:</span> {{ info.High }}&nbsp;&nbsp;
+            <span class="bold">Low:</span> {{ info.Low }}
+          </p>
+          <p><span class="bold">ChangePercent:</span> {{ info.ChangePercent }}</p>
+          <p><span class="bold">Volume:</span> {{ info.Volume }}</p>
+          <p><span class="bold">MarketCap:</span> {{ info.MarketCap }}</p>
+          <p><span class="bold">ChangePercentYTD:</span> {{ info.ChangePercentYTD }}</p>
         </article>
             <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
