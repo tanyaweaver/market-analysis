@@ -7,7 +7,7 @@ from sqlalchemy import and_
 from ..models import Stocks, Users, Association
 try:
     from urllib.parse import urlencode
-except ImportError:
+except ImportError: #pragma: no cover
     from urllib import urlencode
 
 from pyramid.security import remember, forget
@@ -16,17 +16,17 @@ import requests
 
 
 @view_config(route_name='search', renderer='../templates/search.jinja2')
-def search(request):
+def search_stocks(request):
     msg = ''
+    search_results = []
     if request.method == 'GET':
-        return {}
+        return {'stocks': search_results, 'msg': msg}
     elif request.method == 'POST':
-        search_results = []
         try:
             search_name = request.params.get('search')
             search_query = request.dbsession.query(Stocks)\
                 .filter(Stocks.name.startswith(search_name.lower().capitalize()))
-        except DBAPIError:
+        except DBAPIError: #pragma: no cover
             return Response(db_err_msg, content_type='text/plain', status=500)
 
         for row in search_query:
@@ -37,9 +37,8 @@ def search(request):
 
 
 @view_config(route_name='add', renderer='../templates/add_page.jinja2')
-def add(request):
+def add_stock_to_portfolio(request):
     if request.method == 'POST':
-        msg = request.matchdict['name'] + '\nwas added to your portfolio.'
         user_id = 1
         new_user_id = user_id
         new_stock_id = request.matchdict['id']
@@ -50,24 +49,30 @@ def add(request):
             list_of_stock_ids.append(row.stock_id)
         print(list_of_stock_ids)
         if int(new_stock_id) not in list_of_stock_ids:
-            request.dbsession.add(association_row) 
+            request.dbsession.add(association_row)
+            msg = request.matchdict['name'] + ' was added to your portfolio.'
+        else:
+            msg = request.matchdict['name'] + ' is already in your portfolio.'
         return {'msg': msg}
 
 
 @view_config(route_name='delete', renderer='../templates/delete_page.jinja2')
-def delete(request):
+def delete_stock_from_portfolio(request):
     if request.method == 'POST':
         user_id = 1
         new_user_id = user_id
-        new_stock_sym = request.matchdict['sym']  
-        query = request.dbsession.query(Stocks).filter(Stocks.symbol == new_stock_sym).first()
-        query_del=request.dbsession.query(Association)\
-            .filter(and_(Association.stock_id == query.id,
-            Association.user_id == new_user_id)).first()
-        request.dbsession.delete(query_del)
-        msg = request.matchdict['sym'] + '\nwas removed from your portfolio.'
+        new_stock_sym = request.matchdict['sym']
+        try:  
+            query = request.dbsession.query(Stocks).filter(Stocks.symbol == new_stock_sym).first()
+            query_del = request.dbsession.query(Association)\
+                .filter(and_(Association.stock_id == query.id,
+                Association.user_id == new_user_id)).first()
+            request.dbsession.delete(query_del)
+            msg = request.matchdict['sym'] + ' was removed from your portfolio.'
+        except AttributeError:
+            msg = 'Failed: tried to remove a stock that is not in the portfolio.'
     else:
-        msg = 'Failed to remove.' 
+        msg = 'Failed: improper request.'
     return {'msg': msg}
 
 
@@ -92,49 +97,55 @@ def portfolio(request):
 
 
 @view_config(route_name='details', renderer="../templates/details.jinja2")
-def details(request):
+def single_stock_details(request):
     """Details for single-stock."""
+    entries = {}
+    msg = ''
     sym = request.matchdict['sym']
     resp = requests.get('http://dev.markitondemand.com/Api/v2/Quote/json?symbol=' + sym)
     if resp.status_code == 200:
         entries = {key: value for key, value in resp.json().items()}
-        return {'entry': entries}
+        if 'Message' in entries.keys():
+            msg = 'Bad request.'
+            entries = {}
     else:
-        return {''}
+        entries = {}
+        msg = 'Could not fulfill the request.'
+    return {'entry': entries, 'msg': msg}
 
 
-@view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
-def userinfo(request):
-    '''A page to display a users information to the user and allow them to
-        change and update it, or removethemselves from the list of users'''
-    return {'message': 'User info page'}
+# @view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
+# def userinfo(request):
+#     '''A page to display a users information to the user and allow them to
+#         change and update it, or removethemselves from the list of users'''
+#     return {'message': 'User info page'}
 
 
-@view_config(route_name='admin', renderer="../templates/admin.jinja2")
-def admin(request):
-    '''A page to display a users information to the site adimn and allow
-        them to change and update user information, or remove user'''
-    return {'message': 'Admin Info Page'}
+# @view_config(route_name='admin', renderer="../templates/admin.jinja2")
+# def admin(request):
+#     '''A page to display a users information to the site adimn and allow
+#         them to change and update user information, or remove user'''
+#     return {'message': 'Admin Info Page'}
 
-@view_config(route_name='logout')
-def logout(request):
-    headers = forget(request)
-    return HTTPFound(request.route_url('search'), headers=headers)
+# @view_config(route_name='logout')
+# def logout(request):
+#     headers = forget(request)
+#     return HTTPFound(request.route_url('search'), headers=headers)
 
 
-# TODO: if there is a login failure give a message, and stay here
-@view_config(route_name='login', renderer='templates/login.jinja2')
-def login(request):
-    # if request.method == 'POST':
-    #     username = request.params.get('username', '')
-    #     password = request.params.get('password', '')
-    #     if check_credentials(username, password):
-    #         headers = remember(request, username)
-    #         return HTTPFound(location=request.route_url('home'),
-    #                          headers=headers)
-    #     else:
-    #         return {'error': "Username or Password Not Recognized"}
-    return {'error': ''}
+# # TODO: if there is a login failure give a message, and stay here
+# @view_config(route_name='login', renderer='templates/login.jinja2')
+# def login(request):
+#     # if request.method == 'POST':
+#     #     username = request.params.get('username', '')
+#     #     password = request.params.get('password', '')
+#     #     if check_credentials(username, password):
+#     #         headers = remember(request, username)
+#     #         return HTTPFound(location=request.route_url('home'),
+#     #                          headers=headers)
+#     #     else:
+#     #         return {'error': "Username or Password Not Recognized"}
+#     return {'error': ''}
 
 
 def build_graph(request, elements):

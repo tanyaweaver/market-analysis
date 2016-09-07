@@ -14,18 +14,19 @@ from .models.mymodel import (
     )
 from .models.meta import Base
 import datetime
-from sqlalchemy.orm import relationship
-
-def test_public_view(app):
-    response = app.get('/login')
-    assert response.status_code == 200
 
 
-def test_init_db():
-    pass
+DATE = datetime.datetime.now()
+# def test_public_view(app):
+#     response = app.get('/login')
+#     assert response.status_code == 200
 
 
-@pytest.fixture(scope="session")
+# def test_init_db():
+#     pass
+
+
+@pytest.fixture(scope="function")
 def sqlengine(request):
     config = testing.setUp(settings={
         'sqlalchemy.url': 'sqlite:///:memory:'
@@ -56,34 +57,69 @@ def new_session(sqlengine, request):
     return session
 
 
-date = datetime.datetime.now()
+@pytest.fixture(scope='function')
+def users(new_session):
+    user_test = [
+                    'Tom',
+                    'Linda',
+                    'Sally',
+                    'Harold'
+                    ]
+
+    for name in user_test:
+        user = Users(username=name, first_name=name, last_name='', email='', email_verified=True, date_joined=DATE, date_last_logged=DATE, pass_hash='seekrit', phone_number='', phone_number_verified=True, active=True, password_last_changed=DATE, password_expired=False)
+        new_session.add(user)
 
 
-def test_user_model_gets_added(new_session):
+@pytest.fixture(scope='function')
+def stocks(new_session):
+    from market_analysis.scripts.test_db import STOCKS_100
+    for line in STOCKS_100:
+        stock = Stocks(symbol=line[0], name=line[1], exchange='NASDAQ')
+        new_session.add(stock)
+
+
+@pytest.fixture(scope='function')
+def association(new_session):       
+    association_test = [
+                        (1, 1, 10),
+                        (1, 2, 10),
+                        (1, 3, 10),
+                        (1, 4, 13),
+                        (1, 5, 12),
+                        (2, 1, 9),
+                        (2, 4, 9),
+                        (2, 3, 9)]
+    for tup in association_test:
+        association = Association(user_id=tup[0], stock_id=tup[1], shares=tup[2])
+        new_session.add(association)
+
+
+def test_user_model_gets_added(new_session, users):
     """Test that a new model gets added."""
-    assert len(new_session.query(Users).all()) == 0
-    model = Users(username='Tom', first_name='Tom', last_name='Reynolds', email='asdf@asdf.com', email_verified=True, date_joined=date, date_last_logged=date, pass_hash='asdfasdf', phone_number='555-555-5555', phone_number_verified=True, active=True, password_last_changed=date, password_expired=False)
+    assert len(new_session.query(Users).all()) == 4
+    model = Users(username='Jo', first_name='Jo', last_name='Reynolds', email='asdf@asdf.com', email_verified=True, date_joined=DATE, date_last_logged=DATE, pass_hash='asdfasdf', phone_number='555-555-5555', phone_number_verified=True, active=True, password_last_changed=DATE, password_expired=False)
     new_session.add(model)
     new_session.flush()
-    assert len(new_session.query(Users).all()) == 1
+    assert len(new_session.query(Users).all()) == 5
 
 
-def test_stock_model_gets_added(new_session):
+def test_stock_model_gets_added(new_session, stocks):
     """Test that a new model gets added."""
-    assert len(new_session.query(Stocks).all()) == 0
+    assert len(new_session.query(Stocks).all()) == 104
     model = Stocks(symbol='XYZ', name='zipper company', exchange='DOW')
     new_session.add(model)
     new_session.flush()
-    assert len(new_session.query(Stocks).all()) == 1
+    assert len(new_session.query(Stocks).all()) == 105
 
 
-def test_association_model_gets_added(new_session):
+def test_association_model_gets_added(new_session, association):
     """Test that a new model gets added."""
-    assert len(new_session.query(Association).all()) == 0
-    model = Association(user_id=500, stock_id=500, shares=20)
+    assert len(new_session.query(Association).all()) == 8
+    model = Association(user_id=4, stock_id=50, shares=20)
     new_session.add(model)
     new_session.flush()
-    assert len(new_session.query(Association).all()) == 1
+    assert len(new_session.query(Association).all()) == 9
 
 
 def dummy_http_request(new_session, method='GET'):
@@ -94,114 +130,195 @@ def dummy_http_request(new_session, method='GET'):
     return request
 
 
-#def test_portfolio_view_and_API_graph_data(new_session):
-#    """Test main portfolio page that entries is retrieved, and API
-
-#    works and graphs data is returned."""
-#    from .views.default import portfolio
-
-#    model = Stocks(symbol='GOOGL', name='zipper company', exchange='DOW')
-#    new_session.add(model)
-#    model = Stocks(symbol='AMZN', name='zipper company2', exchange='DOW')
-#    new_session.add(model)
-#    new_session.flush()
-
-#    model = Association(user_id=1, stock_id=1, shares=20)
-#    new_session.add(model)
-#    model = Association(user_id=1, stock_id=2, shares=20)
-#    new_session.add(model)
-#    new_session.flush()
-
-#    model = Users(username='Tom', first_name='Tom', last_name='Reynolds', email='asdf@asdf.com', email_verified=True, date_joined=date, date_last_logged=date, pass_hash='asdfasdf', phone_number='555-555-5555', phone_number_verified=True, active=True, password_last_changed=date, password_expired=False)
-#    new_session.add(model)
-#    new_session.flush()
-
-#    http_request = dummy_http_request(new_session)
-#    result = portfolio(http_request)
-#    assert len(result['entry']['stocks'].keys()) == 2
+def test_portfolio_view_and_API_graph_data(new_session, users, stocks, association):
+    """Test main portfolio page that entries is retrieved, and API
+    works and graphs data is returned."""
+    from .views.default import portfolio
+    user_id = 1 # may be reconsider later, when auth is set up
+    http_request = dummy_http_request(new_session)
+    result = portfolio(http_request)
+    assert len(result['entry']['stocks'].keys()) == 5
 
 
-def test_search_letter(new_session):
+def test_search_stocks_letter(new_session, stocks):
     """Test the search functionality."""
-    from .views.default import search
-    from market_analysis.scripts.test_db import STOCKS_100
-    for line in STOCKS_100:
-        model = Stocks(symbol=line[0], name=line[1], exchange='NASDAQ')
-        new_session.add(model)
-    new_session.flush()
-
+    from .views.default import search_stocks
     http_request = dummy_http_request(new_session, 'POST')
     http_request.POST['search'] = 'a'
-    result = search(http_request)
+    result = search_stocks(http_request)
     assert len(result['stocks']) == 13
 
 
-def test_search_name(new_session):
+def test_search_stocks_name(new_session, stocks):
     """Test the search functionality."""
-    from .views.default import search
-    from market_analysis.scripts.test_db import STOCKS_100
-    for line in STOCKS_100:
-        model = Stocks(symbol=line[0], name=line[1], exchange='NASDAQ')
-        new_session.add(model)
-    new_session.flush()
-
+    from .views.default import search_stocks
     http_request = dummy_http_request(new_session, 'POST')
     http_request.POST['search'] = 'alphabet'
-    result = search(http_request)
+    result = search_stocks(http_request)
     assert result['stocks'][0].name == 'Alphabet Inc.' and len(result['stocks']) == 1
 
 
-#def test_new_get(new_session):
-#    """Test new entry get req."""
-#    from .views.default import new
-
-#    new_session.add(MyModel(title="test", body='blah..', creation_date='1066 AD'))
-#    new_session.flush()
-
-#    http_request = dummy_http_request(new_session)
-#    result = new(http_request)
-#    assert result['entry']['goofed'] == 0
+def test_search_stocks_error(new_session, stocks):
+    """Test the search functionality."""
+    from .views.default import search_stocks
+    http_request = dummy_http_request(new_session, 'POST')
+    http_request.POST['search'] = 'afdjfgdfd'
+    result = search_stocks(http_request)
+    assert result['msg'] == 'No results found, try again.'
 
 
-#def test_new_submit_fail(new_session):
-#    """Test new entry fails when data incomplete."""
-#    from .views.default import new
-
-#    new_session.add(MyModel(title='', body='this should fail', creation_date=''))
-#    new_session.flush()
-
-#    http_request = dummy_http_request(new_session, 'POST')
-#    http_request.POST['title'] = ''
-#    http_request.POST['body'] = 'this should fail'
-#    http_request.POST['creation_date'] = ''
-#    result = new(http_request)
-#    assert result['entry']['goofed'] == 1
+def test_search_stocks_GET(new_session, stocks):
+    """Test the search functionality."""
+    from .views.default import search_stocks
+    http_request = dummy_http_request(new_session, 'GET')
+    http_request.POST['search'] = 'a'
+    result = search_stocks(http_request)
+    assert result == {'stocks': [], 'msg': ''}
 
 
-#def test_detail(new_session):
-#    """Test the correct entry is retrieved in detail view."""
-#    from .views.default import detail
-
-#    new_session.add(MyModel(title="test", body='blah..', creation_date='1066 AD'))
-#    new_session.flush()
-
-#    http_request = dummy_http_request(new_session)
-#    http_request.matchdict['id'] = 1
-#    result = detail(http_request)
-#    assert getattr(result['entry'], 'title') == 'test'
+def test_add_new_stock_to_portfolio_msg(new_session, association):
+    from .views.default import add_stock_to_portfolio
+    user_id = 1 # may be reconsider later, when auth is set up
+    http_request = dummy_http_request(new_session, 'POST')
+    http_request.matchdict['name'] = 'Baidu, Inc.'
+    http_request.matchdict['id'] = 14
+    result = add_stock_to_portfolio(http_request)
+    assert result['msg'] == 'Baidu, Inc. was added to your portfolio.'
 
 
-#def test_edit(new_session):
-#    """Test the editing page."""
-#    from .views.default import edit
+def test_add_existing_stock_to_portfolio_msg(new_session, association):
+        from .views.default import add_stock_to_portfolio
+        user_id = 1 # may be reconsider later, when auth is set up
+        http_request = dummy_http_request(new_session, 'POST')
+        http_request.matchdict['name'] = 'Activision Blizzard, Inc.'
+        http_request.matchdict['id'] = 1
+        result = add_stock_to_portfolio(http_request)
+        assert result['msg'] == 'Activision Blizzard, Inc. is already in your portfolio.'
 
-#    new_session.add(MyModel(title="test", body='blah..', creation_date='1066 AD'))
-#    new_session.flush()
 
-#    http_request = dummy_http_request(new_session, 'POST')
-#    http_request.matchdict['id'] = 1
-#    http_request.POST['title'] = 'new title'
-#    http_request.POST['body'] = 'blah 2.0'
-#    http_request.POST['creation_date'] = '1066 AD'
-#    result = edit(http_request)
-#    assert result['updated'] == True
+def test_add_new_stock_to_portfolio_db(new_session, association):
+    from .views.default import add_stock_to_portfolio
+    user_id = 1 # may be reconsider later, when auth is set up
+    http_request = dummy_http_request(new_session, 'POST')
+    http_request.matchdict['name'] = 'Baidu, Inc.'
+    http_request.matchdict['id'] = 14
+    add_stock_to_portfolio(http_request)
+    query = http_request.dbsession.query(Association).filter(Association.user_id == user_id).all()
+    assert len(query) == 6
+
+
+def test_add_existing_stock_to_portfolio_db(new_session, association):
+        from .views.default import add_stock_to_portfolio
+        user_id = 1 # may be reconsider later, when auth is set up
+        http_request = dummy_http_request(new_session, 'POST')
+        http_request.matchdict['name'] = 'Activision Blizzard, Inc.'
+        http_request.matchdict['id'] = 1
+        add_stock_to_portfolio(http_request)
+        query = http_request.dbsession.query(Association).filter(Association.user_id == user_id).all()
+        assert len(query) == 5
+
+
+def test_add_new_stock_to_portfolio_stock_id(new_session, association):
+    from .views.default import add_stock_to_portfolio
+    user_id = 1 # may be reconsider later, when auth is set up
+    http_request = dummy_http_request(new_session, 'POST')
+    http_request.matchdict['name'] = 'Baidu, Inc.'
+    http_request.matchdict['id'] = 14
+    add_stock_to_portfolio(http_request)
+    query = http_request.dbsession.query(Association).filter(Association.user_id == user_id)
+    list_of_stock_ids = []
+    for row in query:
+        list_of_stock_ids.append(row.stock_id)
+    assert 14 in list_of_stock_ids
+
+
+def test_add_existing_stock_to_portfolio_stock_id(new_session, association):
+        from .views.default import add_stock_to_portfolio
+        user_id = 1 # may be reconsider later, when auth is set up
+        http_request = dummy_http_request(new_session, 'POST')
+        http_request.matchdict['name'] = 'Activision Blizzard, Inc.'
+        http_request.matchdict['id'] = 1
+        add_stock_to_portfolio(http_request)
+        query = http_request.dbsession.query(Association).filter(Association.user_id == user_id)
+        list_of_stock_ids = []
+        for row in query:
+            list_of_stock_ids.append(row.stock_id)
+        assert 1 in list_of_stock_ids
+
+# Test del_stock_from_portfolio()
+
+
+def test_del_stock_from_portfolio_msg(new_session, association, stocks):
+        from .views.default import delete_stock_from_portfolio
+        user_id = 1 # may be reconsider later, when auth is set up
+        http_request = dummy_http_request(new_session, 'POST')
+        http_request.matchdict['sym'] = 'ATVI'
+        result = delete_stock_from_portfolio(http_request)
+        assert result['msg'] == 'ATVI was removed from your portfolio.'
+
+
+def test_del_stock_from_portfolio_db(new_session, association, stocks):
+    from .views.default import delete_stock_from_portfolio
+    user_id = 1 # may be reconsider later, when auth is set up
+    http_request = dummy_http_request(new_session, 'POST')
+    http_request.matchdict['sym'] = 'ATVI'
+    delete_stock_from_portfolio(http_request)
+    query = http_request.dbsession.query(Association).filter(Association.user_id == user_id).all()
+    assert len(query) == 4
+
+
+def test_del_stock_from_portfolio_stock_id(new_session, association, stocks):
+    from .views.default import delete_stock_from_portfolio
+    user_id = 1 # may be reconsider later, when auth is set up
+    http_request = dummy_http_request(new_session, 'POST')
+    http_request.matchdict['sym'] = 'ATVI'
+    delete_stock_from_portfolio(http_request)
+    query = http_request.dbsession.query(Association).filter(Association.user_id == user_id)
+    list_of_stock_ids = []
+    for row in query:
+        list_of_stock_ids.append(row.stock_id)
+    assert 1 not in list_of_stock_ids
+
+
+def test_del_stock_from_portfolio_error_POST(new_session, association, stocks):
+    from .views.default import delete_stock_from_portfolio
+    user_id = 1 # may be reconsider later, when auth is set up
+    http_request = dummy_http_request(new_session, 'POST')
+    http_request.matchdict['sym'] = 'ATVIVV'
+    result = delete_stock_from_portfolio(http_request)
+    assert result['msg'] == 'Failed: tried to remove a stock that is not in the portfolio.'
+
+
+def test_del_stock_from_portfolio_error_GET(new_session, association, stocks):
+    from .views.default import delete_stock_from_portfolio
+    user_id = 1 # may be reconsider later, when auth is set up
+    http_request = dummy_http_request(new_session, 'GET')
+    http_request.matchdict['sym'] = 'ATVI'
+    result = delete_stock_from_portfolio(http_request)
+    assert result['msg'] == 'Failed: improper request.'
+
+
+def test_details_ok(new_session):
+    from .views.default import single_stock_details
+    http_request = dummy_http_request(new_session)
+    http_request.matchdict['sym'] = 'CSCO'
+    result = single_stock_details(http_request)
+    assert result['entry']['Symbol'] == 'CSCO'
+
+
+def test_details_error_sym(new_session):
+    from .views.default import single_stock_details
+    http_request = dummy_http_request(new_session)
+    http_request.matchdict['sym'] = 'CSCODSR'
+    result = single_stock_details(http_request)
+    assert result == {'entry': {}, 'msg': 'Bad request.'}
+
+
+# May return to this later
+# def test_details_error_resp_status(new_session):
+#     from .views.default import single_stock_details
+#     http_request = dummy_http_request(new_session)
+#     http_request.matchdict['sym'] = 'CSCO'
+#     result = single_stock_details(http_request)
+#     result.status_code = 404
+#     assert result == {'entry': {}, 'msg': 'Could not fulfill the request.'}
