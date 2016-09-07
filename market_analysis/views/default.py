@@ -177,7 +177,16 @@ def admin(request):
     return {'users': users, 'message': message}
 
 
-@view_config(route_name='home', renderer='templates/login.jinja2')
+@view_config(route_name='home')
+def home(request):
+    if request.authenticated_userid:
+        headers = remember(request, request.authenticated_userid)
+        return HTTPFound(location=request.route_url('portfolio'),
+                         headers=headers)
+    else:
+        return HTTPFound(location=request.route_url('login'))
+
+
 @view_config(route_name='login', renderer='templates/login.jinja2')
 def login(request):
     if request.method == 'POST':
@@ -193,7 +202,8 @@ def login(request):
                 user = query.filter_by(username=username).first()
                 user.date_last_logged = datetime.datetime.now()
             except DBAPIError:
-                return Response(db_err_msg, content_type='text/plain', status=500)
+                return Response(db_err_msg, content_type='text/plain',
+                                status=500)
             return HTTPFound(location=request.route_url('portfolio'),
                              headers=headers)
         else:
