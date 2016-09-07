@@ -1,0 +1,84 @@
+{% extends "layout.jinja2" %}
+  {% block body %}
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        {% if not entry.error %}
+        <article class="single-entry">
+          <h5>Name: {{ info.Name }}</h5>
+          <h5>Symbol: {{ info.Symbol }}</h5>
+          <h5>LastPrice: {{ info.LastPrice }}</h5>
+          <h5>High: {{ info.High }}</h5>
+          <h5>Low: {{ info.Low }}</h5>
+          <h5>ChangePercent: {{ info.ChangePercent }}</h5>
+          <h5>Open: {{ info.Open }}</h5>
+          <h5>Volume: {{ info.Volume }}</h5>
+          <h5>MarketCap: {{ info.MarketCap }}</h5>
+          <h5>ChangePercentYTD: {{ info.ChangePercentYTD }}</h5>
+        </article>
+            <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {packages: ['corechart', 'line']});
+        google.charts.setOnLoadCallback(drawCrosshairs);
+
+    function drawCrosshairs() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'X');
+    {% for stock in entry.stocks %}
+      data.addColumn('number', '{{ stock }}');
+    {% endfor %}
+      rowData = [];
+    {% for date in entry.dates %}
+      rowData.push(['{{ date }}']);
+    {% endfor %}
+
+    for (i = 0; i < rowData.length; i++) {
+        {% for stock, val in entry.stocks.items() %}
+            rowData[i].push({{val.y_values}}[i]);
+        {% endfor %}
+    };
+    data.addRows(rowData)
+
+      var options = {
+        hAxis: {
+          title: 'Time'
+        },
+        vAxis: {
+          title: 'Price'
+        },
+        pointSize: 8,
+        title: '{{ stock }}',
+        height: 400,
+        crosshair: {
+          color: '#000',
+          trigger: 'selection'
+        },
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+      chart.draw(data, options);
+      chart.setSelection([{row: 38, column: 1}]);
+
+    }
+    </script>
+
+    <div id="chart_div"></div>
+
+
+
+
+
+        {% endif %}
+
+        {% if entry.error %}
+        <h3>There was an error.</h3>
+        <h4>{{ entry.error }} - Remove this later.</h4>
+        {% endif %}
+
+
+
+
+  {% endblock %}

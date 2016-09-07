@@ -1,0 +1,15 @@
+[run]
+source = market_analysis
+omit = 
+    market_analysis/test*
+    market_analysis/__init__.py
+    market_analysis/conftest.py
+    market_analysis/routes.py
+    market_analysis/scripts/*
+    market_analysis/models/meta.py
+    market_analysis/models/__init__.py
+    market_analysis/views/notfound.py
+    market_analysis/views/__init__.py
+
+[report]
+exclude_lines = pragma: no cover

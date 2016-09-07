@@ -1,0 +1,38 @@
+import datetime
+
+FAKEUSERS = [
+    {
+        "id": 1,
+        "username": 'fake',
+        "first_name": 'Fakie',
+        "last_name": 'Fake',
+        "email": 'fake@fake.com',
+        "email_verified": False,
+        "date_joined": datetime.datetime.now(),
+        "date_last_logged": datetime.datetime.now(),
+        "pass_hash": '$6$rounds=592828$M3HGCVUVOFj82EZv$ABSn/sV75ZaYNSI.GN5Usebhbng8SmFJuYoEwc/bfacXuIqtFof3/w8Ya/ZCN60NPDeDFDH0kjDQo.LsQTEuL.',
+        "phone_number": '123-123-1234',
+        "phone_number_verified": False,
+        "active": True,
+        "password_last_changed": datetime.datetime.now(),
+        "password_expired": False,
+        "is_admin": 0,
+    },
+    {
+        "id": 1,
+        "username": 'admin',
+        "first_name": 'All',
+        "last_name": 'Powerfull',
+        "email": 'fake@fake.com',
+        "email_verified": False,
+        "date_joined": datetime.datetime.now(),
+        "date_last_logged": datetime.datetime.now(),
+        "pass_hash": '$6$rounds=681628$..EtTOt9pucAFiz0$TuXnB6NkmXV.a3.GXZ501GsPw6ea28wc0tPvDreENi1jiScJg7HET3vvIP1sMaQHS3tZ1lH43N7PfvAivvas3.',
+        "phone_number": '123-123-1234',
+        "phone_number_verified": False,
+        "active": True,
+        "password_last_changed": datetime.datetime.now(),
+        "password_expired": False,
+        "is_admin": 1,
+    },
+]
