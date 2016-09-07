@@ -1,24 +1,28 @@
+from webtest import TestApp as _Test_App
 import os
 import pytest
-import transaction
-import datetime
 from pyramid import testing
-
-from .models.mymodel import Users
-from .models import get_engine
+from .models import (
+    get_engine,
+    get_session_factory,
+    get_tm_session,
+)
 from .models.meta import Base
-from .models import get_session_factory
-from .models import get_tm_session
+import transaction
 
+# import datetime
+from .models.mymodel import Users
 from passlib.apps import custom_app_context as pwd_context
 
 
-@pytest.fixture(scope="session")
+OS_USER = os.environ.get('USER', 'banksd')
+DB_SETTINGS = {'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'.format(OS_USER)}
+
+
+@pytest.fixture(scope='session')
 def sqlengine(request):
-    config = testing.setUp(settings={
-        'sqlalchemy.url': 'sqlite:///:memory:'
-    })
-    config.include(".models")
+    config = testing.setUp(settings=DB_SETTINGS)
+    config.include('.models')
     settings = config.get_settings()
     engine = get_engine(settings)
     Base.metadata.create_all(engine)
@@ -32,39 +36,61 @@ def sqlengine(request):
     return engine
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def new_session(sqlengine, request):
     session_factory = get_session_factory(sqlengine)
-    session = get_tm_session(session_factory, transaction.manager)
+    dbsession = get_tm_session(session_factory, transaction.manager)
 
     def teardown():
         transaction.abort()
 
     request.addfinalizer(teardown)
-    return session
+    return dbsession
 
 
-@pytest.fixture(scope="function")
-def populated_db(request, sqlengine):
-    '''sets up and populates a Data Base for the duration for the test function'''
+@pytest.fixture(scope='session')
+def populated_db(sqlengine, request):
     session_factory = get_session_factory(sqlengine)
-    session = get_tm_session(session_factory, transaction.manager)
+    dbsession = get_tm_session(session_factory, transaction.manager)
 
     with transaction.manager:
-        session.add(Users(title='title: Day 1', body='This is a body',
-                          date=datetime.datetime.now()))
-        session.flush()
+        user = Users(
+            username=USER_CREDENTIALS['username'],
+            pass_hash=pwd_context.encrypt(USER_CREDENTIALS['password']))
+        dbsession.add(user)
+        # import pdb; pdb.set_trace()
+
     def teardown():
         with transaction.manager:
-            session.query(Users).delete()
+            dbsession.query(Users).delete()
 
     request.addfinalizer(teardown)
 
 
-DB_SETTINGS = {'sqlalchemy.url': 'sqlite:///:memory:'}
-# DB_SETTINGS2 = {'sqlalchemy.url': 'postgres://banksd:@localhost:5432/learing_journal'}
+@pytest.fixture(scope='session')
+def populated_db_admin(sqlengine, request):
+    session_factory = get_session_factory(sqlengine)
+    dbsession = get_tm_session(session_factory, transaction.manager)
 
-# app
+    with transaction.manager:
+        user = Users(
+            username=ADMIN_CREDENTIALS['username'],
+            pass_hash=pwd_context.encrypt(ADMIN_CREDENTIALS['password']),
+            is_admin=1)
+        dbsession.add(user)
+        # import pdb; pdb.set_trace()
+
+    def teardown():
+        with transaction.manager:
+            dbsession.query(Users).delete()
+
+    request.addfinalizer(teardown)
+
+
+USER_CREDENTIALS = {'username': 'fake', 'password': 'fake'}
+ADMIN_CREDENTIALS = {'username': 'admin', 'password': 'admin'}
+
+
 @pytest.fixture()
 def app():
     '''testapp fixture'''
@@ -72,8 +98,27 @@ def app():
     app = main({}, **DB_SETTINGS)
     from webtest import TestApp
     return TestApp(app)
-#
-#
+
+
+@pytest.fixture(scope="function")
+def auth_app(app, populated_db):
+    auth_data = {
+        'username': USER_CREDENTIALS['username'],
+        'password': USER_CREDENTIALS['password']
+    }
+    response = app.post('/login', auth_data, status='3*')
+    return app
+
+
+@pytest.fixture(scope="function")
+def admin_app(app, populated_db_admin):
+    auth_data = {
+        'username': ADMIN_CREDENTIALS['username'],
+        'password': ADMIN_CREDENTIALS['password']
+    }
+    response = app.post('/login', auth_data, status='3*')
+    return app
+
 # PASSWORD = 'secret password'
 # ENCRYPTED_PASSWORD = pwd_context.encrypt(PASSWORD)
 #
@@ -85,24 +130,14 @@ def app():
 #     os.environ['AUTH_PASSWORD'] = ENCRYPTED_PASSWORD
 #
 #     return username, PASSWORD
-#
-#
+# #
+# #
 # @pytest.fixture(scope="function")
-# def authenticated_app(app_and_csrf_token, auth_env):
+# def authenticated_app(auth_env, new_session):
 #     app, token = app_and_csrf_token
 #     actual_username, actual_password = auth_env
 #     auth_data = {'username': actual_username,
 #                  'password': actual_password,
 #                  'csrf_token': token}
 #     response = app.post('/login', auth_data, status='3*')
-#
 #     return app
-#
-#
-# @pytest.fixture(scope='function')
-# def app_and_csrf_token(app):
-#     response = app.get('/login')
-#     # import pdb; pdb.set_trace()
-#     input_ = response.html.find('input', attrs={'name': 'csrf_token'})
-#     token = input_.attrs['value']
-#     return app, token

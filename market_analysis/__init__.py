@@ -8,6 +8,7 @@ def main(global_config, **settings):
     config.include('pyramid_jinja2')
     config.include('.models')
     config.include('.routes')
+    config.include('.security')
     config.add_static_view(name='static', path='market_analysis:static')
 
     config.scan()

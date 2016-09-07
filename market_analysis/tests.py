@@ -1,3 +1,4 @@
+
 import os
 from pyramid import testing
 import pytest
@@ -80,7 +81,7 @@ def stocks(new_session):
 
 
 @pytest.fixture(scope='function')
-def association(new_session):       
+def association(new_session):
     association_test = [
                         (1, 1, 10),
                         (1, 2, 10),
