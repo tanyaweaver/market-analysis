@@ -131,10 +131,15 @@ def single_stock_details(request):
         if 'Message' in entries.keys():
             msg = 'Bad request.'
             entries = {}
+        elements = []
+        elements.append({'Symbol': str(sym), 'Type': 'price', 'Params': ['c']})
     else:
         entries = {}
         msg = 'Could not fulfill the request.'
-    return {'entry': entries, 'msg': msg}
+    temp = build_graph(request, elements)
+    temp['info'] = entries
+    temp['msg'] = msg
+    return temp
 
 
 
