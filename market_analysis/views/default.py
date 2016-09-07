@@ -125,7 +125,7 @@ def portfolio(request):
     for stock in list_of_stock_ids:
         elements.append({'Symbol': str(stock),
                          'Type': 'price', 'Params': ['c']})
-    return build_graph(request, elements)
+    return build_graph(request, elements, True)
 
 
 @view_config(route_name='details', renderer="../templates/details.jinja2",
@@ -208,13 +208,32 @@ def logout(request):
     return HTTPFound(request.route_url('login'), headers=headers)
 
 
-def build_graph(request, elements):
+def format_dates(date_list):
+    ret_list = []
+    for date in date_list:
+        date = date[5:10]
+        ret_list.append(date)
+    return ret_list
+
+
+def convert_to_percentage(y_vals):
+    """Convert a list of y_values to be percentage based first val."""
+    initial = y_vals[0]
+    ret_list = []
+    for val in y_vals:
+        val = val / initial - 1
+        ret_list.append(val)
+    return ret_list
+
+
+def build_graph(request, elements, percentage=False):
+    """Builds the graph from an API request."""
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
     req_obj = {
         "parameters":
         {
             'Normalized': 'false',
-            'NumberOfDays': 7,
+            'NumberOfDays': 14,
             'DataPeriod': 'Day',
             'Elements': elements
         }
@@ -229,21 +248,29 @@ def build_graph(request, elements):
 
         # build export dict for template
         export = {}
+
         print(entries)
 
-        export['dates'] = entries['Dates']
+        export['dates'] = format_dates(entries['Dates'])
         export['x_values'] = entries['Positions']
 
         stocks = {}
         for series in entries['Elements']:
+            y_vals = series['DataSeries']['close']['values']
+
+            if percentage:
+                y_vals = convert_to_percentage(y_vals)
+
             stocks[series['Symbol']] = {
-                'y_values': series['DataSeries']['close']['values'],
+                'y_values': y_vals,
                 'currency': series['Currency'],
                 'max': series['DataSeries']['close']['max'],
                 'min': series['DataSeries']['close']['min'],
 
             }
+
         export['stocks'] = stocks
+
         print(export)
         return {'entry': export}
 
