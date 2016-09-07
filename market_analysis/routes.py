@@ -13,4 +13,4 @@ def includeme(config):
     config.add_route('private', '/private')
     config.add_route('public', '/public')
     config.add_route('new_user', '/new_user')
-    config.add_route('portfolio', '/portfolio') 
+    config.add_route('portfolio', '/portfolio')
