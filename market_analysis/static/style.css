@@ -1,26 +1,14 @@
 body {
   min-height: 500px;
-  /*color: red;*/
   font-family: 'Muli', sans-serif;
-  /*font-family: 'Orbitron', sans-serif;*/
-
-  /*font-family: Verdana, sans-serif;*/
-  /*color: blue;*/
-
   background-color: #ccccb3;
-  /*background-color: white;*/
-
-  /*width: 80%;*/
-
 }
 
-
-.navbar{
-  /*background-color: #999966;*/
+.navbar {
   color: black;
 }
+
 .navbar-static-top {
-  /*margin-bottom: 19px;*/
 }
 
 #admin_table {
@@ -62,9 +50,30 @@ html {
 .input-group-addon {
   min-width:60px;  // if you want width please write here //
   text-align:left;
-
 }
 
 .container {
     max-width: 900px;
+}
+
+.msg {
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+.form {
+  width: 70%
+  margin: 0 auto;
+  text-align: center;
+}
+
+.list_of_articles {
+  text-align: left;
+
+}
+
+.single-stock {
+  max-width: 400px;
+  margin: 0 auto;
 }

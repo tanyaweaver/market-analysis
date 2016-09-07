@@ -23,16 +23,16 @@ import requests
 @view_config(route_name='search', renderer='../templates/search.jinja2',
                         permission='secret')
 def search_stocks(request):
-    msg = ''
+    msg = 'Search for stocks that you would like to watch.'
     search_results = []
     if request.method == 'GET':
         return {'stocks': search_results, 'msg': msg}
     elif request.method == 'POST':
         try:
-            search_name = request.params.get('search')
+            search = request.params.get('search')
             search_query = request.dbsession.query(Stocks)\
-                .filter(Stocks.name.startswith(search_name.lower().capitalize()))
-        except DBAPIError:  #pragma: no cover
+                .filter(Stocks.name.startswith(search.lower().capitalize()))
+        except DBAPIError:  # pragma: no cover
             return Response(db_err_msg, content_type='text/plain', status=500)
         for row in search_query:
             search_results.append(row)
@@ -118,14 +118,17 @@ def portfolio(request):
         filter(Users.id == current_user_id).first()
     query = query.children
     list_of_stock_ids = []
+    msg = "Go to Search to add stocks to watch or click on Symbol to see details."
     for row in query:
         list_of_stock_ids.append(row.child.symbol)
-    print(list_of_stock_ids)
-    elements = []
-    for stock in list_of_stock_ids:
-        elements.append({'Symbol': str(stock),
-                         'Type': 'price', 'Params': ['c']})
-    return build_graph(request, elements)
+    if len(list_of_stock_ids) == 0:
+        return HTTPFound(location=request.route_url('search'))
+    else:
+        elements = []
+        for stock in list_of_stock_ids:
+            elements.append({'Symbol': str(stock),
+                             'Type': 'price', 'Params': ['c']})
+        return build_graph(request, elements, msg)
 
 
 @view_config(route_name='details', renderer="../templates/details.jinja2",
@@ -208,7 +211,7 @@ def logout(request):
     return HTTPFound(request.route_url('login'), headers=headers)
 
 
-def build_graph(request, elements):
+def build_graph(request, elements, msg):
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
     req_obj = {
         "parameters":
@@ -244,6 +247,7 @@ def build_graph(request, elements):
 
             }
         export['stocks'] = stocks
+        export['msg'] = msg
         print(export)
         return {'entry': export}
 

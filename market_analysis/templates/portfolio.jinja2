@@ -1,92 +1,98 @@
 {% extends "layout.jinja2" %}
-{% block body %}
+{% block body %}   
+      <!--This is the User Home View-->
+      <!--User stocks and portfolio information will be listed here. The list will be populated from a postgres database.-->
 
-    <!-- <div class="jumbotron"> -->
-      <h4>home.jinja2</h4>
-      <h2>This is the User Home View</h2>
-      <p>User stocks and portfolio information will be listed here. The list will be populated from a postgres database.</p>
+      <div class="msg">
+          <h3> {{ entry.msg }} </h3>
+      </div>
 
-      <table class="table table-inverse">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Symbol</th>
-            <th>Value</th>
-            <th>Shares</th>
-            <th>% of Portfolio</th>
-            <th></th>
-          </tr>
-        </thead>
-          <tbody>
-            {% for stock in entry.stocks %}
-              <tr>
-                <th scope="row">{{ stock.id }}</th>
-                <td><a href="/details/{{ stock }}"><bold>{{ stock }}</bold></a></td>
-                <td>{{ entry.stocks[stock].y_values[-1] }}</td>
-                <td></td>
-                <td></td>
-                <td>
-                        <form action="/delete/{{stock}}" method="POST">
-                        <input class="btn btn-default" type=submit name="delete_button" value="Delete"/>
-                        </form>
-                  </td>
-              </tr>
-            {% endfor %}
-          </table>
-    <!-- </dir> -->
-        <article class="single-entry">
-       <h5>Dates: {{ entry.dates }}</h5>
-       <h5>X-values: {{ entry.x_values }}</h5>
-        {% for stock, val in entry.stocks.items() %}
-            <h5>{{ stock }}:{{ val.y_values }}</h5>
-        {% endfor %}
-    </article>
+      {% if entry.stocks!={} %}
+                <table class="table table-inverse">
+                    <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Symbol</th>
+                            <th>Value</th>
+                            <th>Shares</th>
+                            <th>% of Portfolio</th>
+                            <th></th>
+                          </tr>
+                    </thead>
 
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-        google.charts.load('current', {packages: ['corechart', 'line']});
-        google.charts.setOnLoadCallback(drawCrosshairs);
+                  <tbody>
 
-    function drawCrosshairs() {
-      var data = new google.visualization.DataTable();
-      data.addColumn('string', 'X');
-    {% for stock in entry.stocks %}
-      data.addColumn('number', '{{ stock }}');
-    {% endfor %}
-      rowData = [];
-    {% for date in entry.dates %}
-      rowData.push(['{{ date }}']);
-    {% endfor %}
+                      {% for stock in entry.stocks %}
+                            <tr>
+                                  <th scope="row">{{ stock.id }}</th>
+                                  <td><a href="/details/{{ stock }}"><bold>{{ stock }}</bold></a></td>
+                                  <td>{{ entry.stocks[stock].y_values[-1] }}</td>
+                                  <td></td>
+                                  <td></td>
+                                  <td>
+                                          <form action="/delete/{{stock}}" method="POST">
+                                          <input class="btn btn-default" type=submit name="delete_button" value="Delete"/>
+                                          </form>
+                                    </td>
+                            </tr>
+                      {% endfor %}
+                </table>
 
-    for (i = 0; i < rowData.length; i++) {
-        {% for stock, val in entry.stocks.items() %}
-            rowData[i].push({{val.y_values}}[i]);
-        {% endfor %}
-    };
-    data.addRows(rowData)
+              <!-- to delete later</dir> -->
+                 <article class="single-entry">
+                 <h5>Dates: {{ entry.dates }}</h5>
+                 <h5>X-values: {{ entry.x_values }}</h5>
+                  {% for stock, val in entry.stocks.items() %}
+                      <h5>{{ stock }}:{{ val.y_values }}</h5>
+                  {% endfor %}
+                  </article>
 
-      var options = {
-        hAxis: {
-          title: 'Time'
-        },
-        vAxis: {
-          title: 'Price'
-        },
-        pointSize: 10,
-        crosshair: {
-          color: '#000',
-          trigger: 'selection'
-        }
-      };
+              <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+              <script type="text/javascript">
+                  google.charts.load('current', {packages: ['corechart', 'line']});
+                  google.charts.setOnLoadCallback(drawCrosshairs);
 
-      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+              function drawCrosshairs() {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'X');
+              {% for stock in entry.stocks %}
+                data.addColumn('number', '{{ stock }}');
+              {% endfor %}
+                rowData = [];
+              {% for date in entry.dates %}
+                rowData.push(['{{ date }}']);
+              {% endfor %}
 
-      chart.draw(data, options);
-      chart.setSelection([{row: 38, column: 1}]);
+              for (i = 0; i < rowData.length; i++) {
+                  {% for stock, val in entry.stocks.items() %}
+                      rowData[i].push({{val.y_values}}[i]);
+                  {% endfor %}
+              };
+              data.addRows(rowData)
 
-    }
-    </script>
+                var options = {
+                  hAxis: {
+                    title: 'Time'
+                  },
+                  vAxis: {
+                    title: 'Price'
+                  },
+                  pointSize: 10,
+                  crosshair: {
+                    color: '#000',
+                    trigger: 'selection'
+                  }
+                };
 
-    <div id="chart_div"></div>
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+                chart.draw(data, options);
+                chart.setSelection([{row: 38, column: 1}]);
+
+              }
+              </script>
+
+              <div id="chart_div"></div>
+{% endif %}
 
 {% endblock %}
