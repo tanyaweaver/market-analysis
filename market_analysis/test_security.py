@@ -94,6 +94,8 @@ def test_admin_delet_post_request_csrf(admin_app, populated_db):
     response = app.post('/admin', auth_data, status='2*')
     assert response.status_code == 200
 
+# no
+
 
 
 
