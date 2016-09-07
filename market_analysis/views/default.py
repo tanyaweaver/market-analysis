@@ -20,7 +20,8 @@ import datetime
 import requests
 
 
-@view_config(route_name='search', renderer='../templates/search.jinja2')
+@view_config(route_name='search', renderer='../templates/search.jinja2',
+                        permission='secret')
 def search_stocks(request):
     msg = ''
     search_results = []
@@ -31,9 +32,8 @@ def search_stocks(request):
             search_name = request.params.get('search')
             search_query = request.dbsession.query(Stocks)\
                 .filter(Stocks.name.startswith(search_name.lower().capitalize()))
-        except DBAPIError: #pragma: no cover
+        except DBAPIError:  #pragma: no cover
             return Response(db_err_msg, content_type='text/plain', status=500)
-
         for row in search_query:
             search_results.append(row)
         if len(search_results) == 0:
@@ -45,16 +45,16 @@ def search_stocks(request):
              permission='secret')
 def add_stock_to_portfolio(request):
     if request.method == 'POST':
-        user_id = 1
-        new_user_id = user_id
+        current_user_id = request.dbsession.query(Users).filter(
+                Users.username == request.authenticated_userid
+            ).first().id
         new_stock_id = request.matchdict['id']
-        association_row = Association(user_id=new_user_id, stock_id=new_stock_id)
-        query = request.dbsession.query(Association).filter(Association.user_id == user_id)
+        query = request.dbsession.query(Association).filter(Association.user_id == current_user_id)
         list_of_stock_ids = []
         for row in query:
             list_of_stock_ids.append(row.stock_id)
-        print(list_of_stock_ids)
         if int(new_stock_id) not in list_of_stock_ids:
+            association_row = Association(user_id=current_user_id, stock_id=new_stock_id)
             request.dbsession.add(association_row)
             msg = request.matchdict['name'] + ' was added to your portfolio.'
         else:
@@ -66,14 +66,16 @@ def add_stock_to_portfolio(request):
              permission='secret')
 def delete_stock_from_portfolio(request):
     if request.method == 'POST':
-        user_id = 1
-        new_user_id = user_id
+        current_user_id = request.dbsession.query(Users).filter(
+                Users.username == request.authenticated_userid
+            ).first().id
         new_stock_sym = request.matchdict['sym']
         try:
-            query = request.dbsession.query(Stocks).filter(Stocks.symbol == new_stock_sym).first()
+            query = request.dbsession.query(Stocks).\
+             filter(Stocks.symbol == new_stock_sym).first()
             query_del = request.dbsession.query(Association)\
                 .filter(and_(Association.stock_id == query.id,
-                Association.user_id == new_user_id)).first()
+                             Association.user_id == current_user_id)).first()
             request.dbsession.delete(query_del)
             msg = request.matchdict['sym'] + ' was removed from your portfolio.'
         except AttributeError:
@@ -105,31 +107,36 @@ def home_test(request):
 @view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2",
              permission='secret')
 def portfolio(request):
-    '''The main user portfolio page, displays a list of their stocks and other
-       cool stuff'''
-
-    user_id = 1
-    query = request.dbsession.query(Users).filter(Users.id == user_id).first()
+    '''
+    The main user portfolio page, displays a list of
+    their stocks and a graph.
+    '''
+    current_user_id = request.dbsession.query(Users).filter(
+                Users.username == request.authenticated_userid
+            ).first().id
+    query = request.dbsession.query(Users).\
+        filter(Users.id == current_user_id).first()
     query = query.children
     list_of_stock_ids = []
     for row in query:
         list_of_stock_ids.append(row.child.symbol)
     print(list_of_stock_ids)
-
     elements = []
     for stock in list_of_stock_ids:
-        elements.append({'Symbol': str(stock), 'Type': 'price', 'Params': ['c']})
-
+        elements.append({'Symbol': str(stock),
+                         'Type': 'price', 'Params': ['c']})
     return build_graph(request, elements)
 
 
-@view_config(route_name='details', renderer="../templates/details.jinja2")
+@view_config(route_name='details', renderer="../templates/details.jinja2",
+                        permission="secret")
 def single_stock_details(request):
     """Details for single-stock."""
     entries = {}
     msg = ''
     sym = request.matchdict['sym']
-    resp = requests.get('http://dev.markitondemand.com/Api/v2/Quote/json?symbol=' + sym)
+    resp = requests.get('http://dev.markitondemand.com/'
+                        'Api/v2/Quote/json?symbol=' + sym)
     if resp.status_code == 200:
         entries = {key: value for key, value in resp.json().items()}
         if 'Message' in entries.keys():
@@ -294,8 +301,8 @@ def new_user(request):
                     request.dbsession.add(new)
                     return HTTPFound(location=request.route_url('portfolio'))
                 else:
-                    error = 'Passwords do not match or password \
-                             is less then 6 characters'
+                    error = 'Passwords do not match or password'\
+                            'is less then 6 characters'
             else:
                 error = 'Missing Required Fields'
 
