@@ -171,9 +171,6 @@ def admin(request):
     return {'users': users, 'message': message}
 
 
-
-
-
 # TODO: if there is a login failure give a message, and stay here
 @view_config(route_name='login', renderer='templates/login.jinja2')
 def login(request):
@@ -292,6 +289,7 @@ def new_user(request):
                         active=1,
                         password_last_changed=datetime.datetime.now(),
                         password_expired=1,
+                        is_admin=0,
                     )
                     request.dbsession.add(new)
                     return HTTPFound(location=request.route_url('portfolio'))

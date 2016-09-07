@@ -22,6 +22,7 @@
         <th>active</th>
         <th>date joined</th>
         <th>date last logged</th>
+        <th>Admin?</th>
         <th></th>
       </tr>
     </thead>
@@ -39,9 +40,10 @@
             <td>{{ user.active }}</td>
             <td>{{ user.date_joined }}</td>
             <td>{{ user.date_last_logged }}</td>
+            <td>{{ user.is_admin  }}</td>
             <form action='/admin' method="POST">
               <td><button type="submit" class="btn btn-primary btn-sm" name="username" value={{ user.username }}>Delete</button></tb>
-            </form
+            </form>
           </tr>
         {% endfor %}
   </table>
