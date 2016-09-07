@@ -28,6 +28,7 @@
                 <td></td>
                 <td>
                         <form action="/delete/{{stock}}" method="POST">
+                          <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
                           <input class="btn btn-default" type=submit name="delete_button" value="Delete"/>
                         </form>
                   </td>
