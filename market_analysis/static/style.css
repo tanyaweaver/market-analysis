@@ -7,13 +7,18 @@ body {
   /*font-family: Verdana, sans-serif;*/
   /*color: blue;*/
 
-  /*background-color: #ccccb3;*/
-  background-color: white;
+  background-color: #ccccb3;
+  /*background-color: white;*/
 
   /*width: 80%;*/
 
 }
 
+
+.navbar{
+  /*background-color: #999966;*/
+  color: black;
+}
 .navbar-static-top {
   /*margin-bottom: 19px;*/
 }
