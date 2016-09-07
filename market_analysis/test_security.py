@@ -41,6 +41,18 @@ def test_login_correct_user_info(app_and_csrf_token, populated_db):
     assert response.status_code == 302
 
 
+def test_login_bad_user_info(app_and_csrf_token, populated_db):
+    '''Checks the POST form submital for correct user login data'''
+    # import pdb; pdb.set_trace()
+    app, token = app_and_csrf_token
+    auth_data = {'username': 'fake',
+                 'password': 'not the correct password',
+                 'csrf_token': token}
+    response = app.post('/login', auth_data, status='2*')
+    # import pdb; pdb.set_trace()
+    assert b"Username or Password Not Recognized" in response.body
+
+
 def test_private_view_access_to_authenticated(auth_app, populated_db):
     response = auth_app.get('/private', status='2*')
     assert response.status_code == 200
