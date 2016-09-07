@@ -62,7 +62,9 @@ def test_admin_accessable_to_adim(admin_app, populated_db_admin):
     assert response.status_code == 200
 
 
-
+def test_admin_not_accessable_to_non_admin(auth_app, populated_db):
+    response = auth_app.get('/admin', status='4*')
+    assert response.status_code == 403
 
 
 
