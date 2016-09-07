@@ -4,7 +4,6 @@ ipython==5.1.0
 ipython-genutils==0.1.0
 Jinja2==2.8
 Mako==1.0.4
--e git+https://github.com/tanyaweaver/market-analysis.git@f7b89602ccd2ae095e4e2efc15971be4e3c69742#egg=market_analysis
 MarkupSafe==0.23
 matplotlib==1.5.2
 mpld3==0.2

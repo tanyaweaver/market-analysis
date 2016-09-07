@@ -9,7 +9,7 @@ from sqlalchemy import and_
 from ..models import Stocks, Users, Association
 try:
     from urllib.parse import urlencode
-except ImportError: #pragma: no cover
+except ImportError:     # pragma: no cover
     from urllib import urlencode
 
 from pyramid.security import remember, forget
@@ -41,7 +41,8 @@ def search_stocks(request):
         return {'stocks': search_results, 'msg': msg}
 
 
-@view_config(route_name='add', renderer='../templates/add_page.jinja2')
+@view_config(route_name='add', renderer='../templates/add_page.jinja2',
+             permission='secret')
 def add_stock_to_portfolio(request):
     if request.method == 'POST':
         user_id = 1
@@ -61,7 +62,8 @@ def add_stock_to_portfolio(request):
         return {'msg': msg}
 
 
-@view_config(route_name='delete', renderer='../templates/delete_page.jinja2')
+@view_config(route_name='delete', renderer='../templates/delete_page.jinja2',
+             permission='secret')
 def delete_stock_from_portfolio(request):
     if request.method == 'POST':
         user_id = 1
@@ -79,6 +81,7 @@ def delete_stock_from_portfolio(request):
     else:
         msg = 'Failed: improper request.'
     return {'msg': msg}
+
 
 @view_config(route_name='private',
              renderer='string',
@@ -99,7 +102,8 @@ def home_test(request):
     return {}
 
 
-@view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2")
+@view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2",
+             permission='secret')
 def portfolio(request):
     '''The main user portfolio page, displays a list of their stocks and other
        cool stuff'''
@@ -142,7 +146,6 @@ def single_stock_details(request):
     return temp
 
 
-
 # @view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
 # def userinfo(request):
 #     '''A page to display a users information to the user and allow them to
@@ -155,12 +158,17 @@ def single_stock_details(request):
 def admin(request):
     '''A page to display a users information to the site adimn and allow
         them to change and update user information, or remove user'''
+    # import pdb; pdb.set_trace()
+    message = ''
+    if request.method == 'POST':
+        username = request.POST['username']
+        message = 'The delete button was pressed for user {}'.format(username)
     try:
         query = request.dbsession.query(Users)
         users = query.all()
     except DBAPIError:
         return Response(db_err_msg, content_type='text/plain', status=500)
-    return {'users': users, 'messages': {}}
+    return {'users': users, 'message': message}
 
 
 # TODO: if there is a login failure give a message, and stay here
@@ -185,6 +193,12 @@ def login(request):
         else:
             return {'error': "Username or Password Not Recognized"}
     return {'error': ''}
+
+
+@view_config(route_name='logout')
+def logout(request):
+    headers = forget(request)
+    return HTTPFound(request.route_url('login'), headers=headers)
 
 
 def build_graph(request, elements):
@@ -275,9 +289,10 @@ def new_user(request):
                         active=1,
                         password_last_changed=datetime.datetime.now(),
                         password_expired=1,
+                        is_admin=0,
                     )
                     request.dbsession.add(new)
-                    return HTTPFound(location=request.route_url('admin'))
+                    return HTTPFound(location=request.route_url('portfolio'))
                 else:
                     error = 'Passwords do not match or password \
                              is less then 6 characters'

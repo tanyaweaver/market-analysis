@@ -96,5 +96,5 @@ def main(argv=sys.argv):
                          password_last_changed=line['password_last_changed'],
                          password_expired=line['password_expired'],
                          is_admin=line['is_admin'],
-                        )
+                         )
             dbsession.add(user)
