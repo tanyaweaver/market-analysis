@@ -98,12 +98,6 @@ def pubic(request):
     return "I'm a public page"
 
 
-@view_config(route_name='home_test',
-             renderer='../templates/home_page_test.jinja2')
-def home_test(request):
-    return {}
-
-
 @view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2",
              permission='secret')
 def portfolio(request):

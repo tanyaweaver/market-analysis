@@ -101,23 +101,36 @@ def app():
 
 
 @pytest.fixture(scope="function")
-def auth_app(app, populated_db):
+def auth_app(app_and_csrf_token, populated_db):
+    app, token = app_and_csrf_token
     auth_data = {
         'username': USER_CREDENTIALS['username'],
-        'password': USER_CREDENTIALS['password']
+        'password': USER_CREDENTIALS['password'],
+        'csrf_token': token,
     }
     response = app.post('/login', auth_data, status='3*')
     return app
 
 
 @pytest.fixture(scope="function")
-def admin_app(app, populated_db_admin):
+def admin_app(app_and_csrf_token, populated_db_admin):
+    app, token = app_and_csrf_token
     auth_data = {
         'username': ADMIN_CREDENTIALS['username'],
-        'password': ADMIN_CREDENTIALS['password']
+        'password': ADMIN_CREDENTIALS['password'],
+        'csrf_token': token,
     }
     response = app.post('/login', auth_data, status='3*')
-    return app
+    return app, token
+
+
+@pytest.fixture(scope='function')
+def app_and_csrf_token(app):
+    response = app.get('/login')
+    # import pdb; pdb.set_trace()
+    input_ = response.html.find('input', attrs={'name': 'csrf_token'})
+    token = input_.attrs['value']
+    return app, token
 
 # PASSWORD = 'secret password'
 # ENCRYPTED_PASSWORD = pwd_context.encrypt(PASSWORD)
