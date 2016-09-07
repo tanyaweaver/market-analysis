@@ -82,6 +82,7 @@ def delete_stock_from_portfolio(request):
         msg = 'Failed: improper request.'
     return {'msg': msg}
 
+
 @view_config(route_name='private',
              renderer='string',
              permission='secret')
@@ -145,7 +146,6 @@ def single_stock_details(request):
     return temp
 
 
-
 # @view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
 # def userinfo(request):
 #     '''A page to display a users information to the user and allow them to
@@ -159,12 +159,19 @@ def admin(request):
     '''A page to display a users information to the site adimn and allow
         them to change and update user information, or remove user'''
     # import pdb; pdb.set_trace()
+    message = ''
+    if request.method == 'POST':
+        username = request.POST['username']
+        message = 'The delete button was pressed for user {}'.format(username)
     try:
         query = request.dbsession.query(Users)
         users = query.all()
     except DBAPIError:
         return Response(db_err_msg, content_type='text/plain', status=500)
-    return {'users': users, 'messages': {}}
+    return {'users': users, 'message': message}
+
+
+
 
 
 # TODO: if there is a login failure give a message, and stay here
@@ -195,7 +202,6 @@ def login(request):
 def logout(request):
     headers = forget(request)
     return HTTPFound(request.route_url('login'), headers=headers)
-
 
 
 def build_graph(request, elements):
@@ -288,7 +294,7 @@ def new_user(request):
                         password_expired=1,
                     )
                     request.dbsession.add(new)
-                    return HTTPFound(location=request.route_url('admin'))
+                    return HTTPFound(location=request.route_url('portfolio'))
                 else:
                     error = 'Passwords do not match or password \
                              is less then 6 characters'

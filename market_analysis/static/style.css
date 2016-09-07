@@ -23,9 +23,12 @@ body {
   /*margin-bottom: 19px;*/
 }
 
-# admin_table {
-  font-size: 10px;
-
+#admin_table {
+  font-size: 12px;
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 #content {

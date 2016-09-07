@@ -1,17 +1,12 @@
 {% extends "layout.jinja2" %}
 {% block body %}
 
-  <!-- <div class="jumbotron"> -->
-  <!-- <div class="panel panel-default">
-    <div class="panel-body"> -->
-    <!-- <container> -->
-      <hr>
-      <hr>
       <h2>Admin.jinja2</h2>
       <p>Display a list of user info populated from the User table. Provide options to Remove user, Request a password updated Etc</p>
-    <!-- </div> -->
-    <!-- </container> -->
-  </div>
+
+      {% if message %}
+        <div class="alert alert-success" role="alert">{{ message }}</div>
+      {% endif %}
 
   <table class="table table-inverse" id="admin_table">
     <thead>
@@ -27,6 +22,7 @@
         <th>active</th>
         <th>date joined</th>
         <th>date last logged</th>
+        <th></th>
       </tr>
     </thead>
       <tbody>
@@ -43,6 +39,9 @@
             <td>{{ user.active }}</td>
             <td>{{ user.date_joined }}</td>
             <td>{{ user.date_last_logged }}</td>
+            <form action='/admin' method="POST">
+              <td><button type="submit" class="btn btn-primary btn-sm" name="username" value={{ user.username }}>Delete</button></tb>
+            </form
           </tr>
         {% endfor %}
   </table>
