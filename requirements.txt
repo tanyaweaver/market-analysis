@@ -37,8 +37,6 @@ requests==2.11.1
 simplegeneric==0.8.1
 six==1.10.0
 SQLAlchemy==1.0.14
-testapp==0.0
-tox==2.3.1
 traitlets==4.2.2
 transaction==1.6.1
 translationstring==1.3
