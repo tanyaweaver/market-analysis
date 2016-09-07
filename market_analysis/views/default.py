@@ -171,7 +171,7 @@ def admin(request):
     return {'users': users, 'message': message}
 
 
-# TODO: if there is a login failure give a message, and stay here
+@view_config(route_name='home', renderer='templates/login.jinja2')
 @view_config(route_name='login', renderer='templates/login.jinja2')
 def login(request):
     if request.method == 'POST':
