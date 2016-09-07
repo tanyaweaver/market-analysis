@@ -25,21 +25,22 @@
 
            {% for stock in stocks %}
               <article class="single-stock">
-                  
-                      
+
+
 
                       <form action="/add/{{stock.name}}/{{stock.id}}" method="POST">
+                                  <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
                                   <input class="btn btn-default" type=submit name="add_button" value="Add"/>
                                   <label for="add_button">{{ stock.symbol }} {{ stock.name }}</label>
                       </form>
-                  
+
                </article>
             {% endfor %}
-          
+
           </div><!-- /input-group -->
         </div><!-- /.col-lg-6 -->
 
        </div>
     </div>
-    
+
 {% endblock %}
