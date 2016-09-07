@@ -48,11 +48,13 @@
         vAxis: {
           title: 'Price'
         },
-        pointSize: 10,
+        pointSize: 8,
+        title: '{{ stock }}',
+        height: 400,
         crosshair: {
           color: '#000',
           trigger: 'selection'
-        }
+        },
       };
 
       var chart = new google.visualization.LineChart(document.getElementById('chart_div'));

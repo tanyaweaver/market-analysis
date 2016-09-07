@@ -34,13 +34,13 @@
             {% endfor %}
           </table>
     <!-- </dir> -->
-        <article class="single-entry">
+        {# <article class="single-entry">
        <h5>Dates: {{ entry.dates }}</h5>
        <h5>X-values: {{ entry.x_values }}</h5>
         {% for stock, val in entry.stocks.items() %}
             <h5>{{ stock }}:{{ val.y_values }}</h5>
         {% endfor %}
-    </article>
+    </article> #}
 
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -70,9 +70,11 @@
           title: 'Time'
         },
         vAxis: {
-          title: 'Price'
+          title: 'Percent Change'
         },
-        pointSize: 10,
+        title: 'Your Portfolio - Percent Change',
+        pointSize: 8,
+        height: 400,
         crosshair: {
           color: '#000',
           trigger: 'selection'
