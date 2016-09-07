@@ -17,8 +17,9 @@
           <div class="input-group">
 
           <form action="{{ request.route_url('search') }}" method="POST">
-                    <input class="search_input" type="text" name="search"/>
-                    <input class="btn btn-default" type="submit" value="Search"/>
+            <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
+            <input class="search_input" type="text" name="search"/>
+            <input class="btn btn-default" type="submit" value="Search"/>
           </form>
 
           <h3>{{ msg }}</h3>
@@ -29,9 +30,9 @@
 
 
                       <form action="/add/{{stock.name}}/{{stock.id}}" method="POST">
-                                  <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
-                                  <input class="btn btn-default" type=submit name="add_button" value="Add"/>
-                                  <label for="add_button">{{ stock.symbol }} {{ stock.name }}</label>
+                        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
+                        <input class="btn btn-default" type=submit name="add_button" value="Add"/>
+                        <label for="add_button">{{ stock.symbol }} {{ stock.name }}</label>
                       </form>
 
                </article>
