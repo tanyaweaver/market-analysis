@@ -37,11 +37,49 @@ def test_login_correct_user_info(app, populated_db):
     assert response.status_code == 302
 
 
-# def test_private_view_accessable_to_authenticated(authenticated_app):
-#     response = authenticated_app.get('private', status='2*')
-#     assert response.status_code == 200
+def test_private_view_access_to_authenticated(auth_app, populated_db):
+    response = auth_app.get('/private', status='2*')
+    assert response.status_code == 200
 
 
-# # def test_createnewuser_view_is_public(app):
-#     response = app.get('/new_user', status='2*')
-#     assert response.status_code == 200
+def test_createnewuser_view_is_public(app):
+    response = app.get('/new_user', status='2*')
+    assert response.status_code == 200
+
+
+def test_new_user_is_public(app):
+    response = app.get('/new_user', status="2*")
+    assert response.status_code == 200
+
+
+def test_admin_is_private(app):
+    response = app.get('/admin', status='4*')
+    assert response.status_code == 403
+
+
+def test_admin_accessable_to_adim(admin_app, populated_db_admin):
+    response = admin_app.get('/admin', status='2*')
+    assert response.status_code == 200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ffds

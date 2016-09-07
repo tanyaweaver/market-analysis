@@ -59,7 +59,8 @@ def userinfo(request):
     return {'message': 'User info page'}
 
 
-@view_config(route_name='admin', renderer="../templates/admin.jinja2")
+@view_config(route_name='admin', renderer="../templates/admin.jinja2",
+             permission='admin')
 def admin(request):
     '''A page to display a users information to the site adimn and allow
         them to change and update user information, or remove user'''

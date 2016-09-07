@@ -26,5 +26,6 @@ class Users(Base):
     active = Column(Unicode)
     password_last_changed = Column(DateTime)
     password_expired = Column(Unicode)
+    is_admin = Column(Unicode)
 
 # Index('my_index', Users.username, unique=True, mysql_length=255)

@@ -67,7 +67,28 @@ def populated_db(sqlengine, request):
     request.addfinalizer(teardown)
 
 
+@pytest.fixture(scope='session')
+def populated_db_admin(sqlengine, request):
+    session_factory = get_session_factory(sqlengine)
+    dbsession = get_tm_session(session_factory, transaction.manager)
+
+    with transaction.manager:
+        user = Users(
+            username=ADMIN_CREDENTIALS['username'],
+            pass_hash=pwd_context.encrypt(ADMIN_CREDENTIALS['password']),
+            is_admin=1)
+        dbsession.add(user)
+        # import pdb; pdb.set_trace()
+
+    def teardown():
+        with transaction.manager:
+            dbsession.query(Users).delete()
+
+    request.addfinalizer(teardown)
+
+
 USER_CREDENTIALS = {'username': 'fake', 'password': 'fake'}
+ADMIN_CREDENTIALS = {'username': 'admin', 'password': 'admin'}
 
 
 @pytest.fixture()
@@ -80,10 +101,20 @@ def app():
 
 
 @pytest.fixture(scope="function")
-def authenticated_app(app, populated_db):
+def auth_app(app, populated_db):
     auth_data = {
         'username': USER_CREDENTIALS['username'],
         'password': USER_CREDENTIALS['password']
+    }
+    response = app.post('/login', auth_data, status='3*')
+    return app
+
+
+@pytest.fixture(scope="function")
+def admin_app(app, populated_db_admin):
+    auth_data = {
+        'username': ADMIN_CREDENTIALS['username'],
+        'password': ADMIN_CREDENTIALS['password']
     }
     response = app.post('/login', auth_data, status='3*')
     return app

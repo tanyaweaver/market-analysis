@@ -18,12 +18,20 @@ class MyRoot(object):
     def __init__(self, request):
         self.request = request
 
-    __acl__ = [
-        (Allow, Everyone, 'view'),
-        (Allow, Authenticated, 'secret'),
-        (Allow, Authenticated, 'admin'),
-        (Allow, Authenticated, 'all_auth'),
-    ]
+    def __acl__(self):
+        base_list = [
+            (Allow, Everyone, 'view'),
+            (Allow, Authenticated, 'secret'),
+        ]
+        # import pdb; pdb.set_trace()
+        if self.request.authenticated_userid:
+            current_user = self.request.dbsession.query(Users).filter(
+                Users.username==self.request.authenticated_userid
+            ).first()
+            if current_user and current_user.is_admin:
+                base_list.append((Allow, self.request.authenticated_userid,
+                                 'admin'))
+        return base_list
 
 
 def includeme(config):
