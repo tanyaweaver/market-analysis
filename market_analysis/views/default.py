@@ -250,6 +250,7 @@ def convert_to_percentage(y_vals):
 def build_graph(request, elements, percentage=False):
 # def build_graph(request, elements, msg):
     """Builds the graph from an API request."""
+
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
     req_obj = {
         "parameters":
@@ -260,6 +261,9 @@ def build_graph(request, elements, percentage=False):
             'Elements': elements
         }
     }
+
+    total_shares = 0
+    total_value = 0
 
     resp = requests.get(url, params=urlencode(req_obj))
 
@@ -276,27 +280,57 @@ def build_graph(request, elements, percentage=False):
         export['dates'] = format_dates(entries['Dates'])
         export['x_values'] = entries['Positions']
 
+        daily_totals = [0 for j in range(len(export['x_values']))]
+
         stocks = {}
         for series in entries['Elements']:
             y_vals = series['DataSeries']['close']['values']
-
             price = y_vals[-1]
-            if percentage:
-                y_vals = convert_to_percentage(y_vals)
 
             current_stock_id = request.dbsession.query(Stocks).filter(Stocks.symbol == series['Symbol']).first().id
             shares = request.dbsession.query(Association).filter(Association.stock_id == current_stock_id).first().shares
+            total_shares += shares
+            total_value += price * shares
+
+            for i in range(len(y_vals)):
+                daily_totals[i] += (y_vals[i] * shares)
+
+            if percentage:
+                y_vals = convert_to_percentage(y_vals)
+
+            print()
+            print('---------------=-=-=---------------')
+            print('daily totals filled:', daily_totals)
+            print()
 
             stocks[series['Symbol']] = {
                 'y_values': y_vals,
                 'price': price,
-                'currency': series['Currency'],
                 'max': series['DataSeries']['close']['max'],
                 'min': series['DataSeries']['close']['min'],
                 'shares': shares,
+                'value': price * shares,
             }
 
+        daily_change = []
+        for tot in daily_totals:
+            daily_change.append((tot / daily_totals[0] - 1) * 100)
+
+        print()
+        print("-------------=-=-=----------------------")
+        print('daily_change:', daily_change)
+        print()
+
+        stocks['Total'] = {
+            'y_values': daily_change,
+            'price': total_value,
+            'shares': total_shares,
+            'value': total_value * total_shares,
+        }
+
         export['stocks'] = stocks
+        export['total_shares'] = total_shares
+        export['total_value'] = total_value
 
         print(export)
         return {'entry': export}
