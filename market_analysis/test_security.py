@@ -63,9 +63,19 @@ def test_createnewuser_view_is_public(app):
     assert response.status_code == 200
 
 
-def test_new_user_is_public(app):
-    response = app.get('/new_user', status="2*")
-    assert response.status_code == 200
+def test_logout(app):
+    response = app.get('/logout', status="3*")
+    assert response.status_code == 302
+
+
+def test_home_public(app):
+    response = app.get('/', status="3*")
+    assert response.status_code == 302
+
+
+def test_home_rederects_to_portfolio(auth_app, populated_db):
+    response = auth_app.get('/', status='3*')
+    assert response.status_code == 302
 
 
 def test_admin_is_private(app):
@@ -94,12 +104,87 @@ def test_admin_delet_post_request_csrf(admin_app, populated_db):
     response = app.post('/admin', auth_data, status='2*')
     assert response.status_code == 200
 
-# no
+
+def test_new_user_is_public(app):
+    response = app.get('/new_user', status="2*")
+    assert response.status_code == 200
 
 
+def test_new_user_post_missing_field(app_and_csrf_token, populated_db):
+    '''Checks the POST form missing fields'''
+    app, token = app_and_csrf_token
+    auth_data = {'username': '',
+                 'password': 'fdsafdsa',
+                 'password_verify': 'fdsafda',
+                 'last_name': 'Smith',
+                 'first_name': 'Zeek',
+                 'email': 'fdsa@fdafd',
+                 'phone_number': '43232423423',
+                 'csrf_token': token}
+    response = app.post('/new_user', auth_data, status='2*')
+    assert b"Missing Required Fields" in response.body
 
 
+def test_new_user_post_passwords_not_match(app_and_csrf_token, populated_db):
+    '''Checks the POST form missing fields'''
+    app, token = app_and_csrf_token
+    auth_data = {'username': 'jkfdajkfda',
+                 'password': 'fakefakefake',
+                 'password_verify': 'fdsafda',
+                 'last_name': 'Smith',
+                 'first_name': 'Zeek',
+                 'email': 'fdsa@fdafd',
+                 'phone_number': '43232423423',
+                 'csrf_token': token}
+    response = app.post('/new_user', auth_data, status='2*')
+    assert b'Passwords do not match or password'\
+        b'is less then 6 characters' in response.body
 
+
+def test_new_user_post_short_password(app_and_csrf_token, populated_db):
+    '''Checks the POST form missing fields'''
+    app, token = app_and_csrf_token
+    auth_data = {'username': 'jkfdajkfda',
+                 'password': 'fake',
+                 'password_verify': 'fake',
+                 'last_name': 'Smith',
+                 'first_name': 'Zeek',
+                 'email': 'fdsa@fdafd',
+                 'phone_number': '43232423423',
+                 'csrf_token': token}
+    response = app.post('/new_user', auth_data, status='2*')
+    assert b'Passwords do not match or password'\
+        b'is less then 6 characters' in response.body
+
+
+def test_new_user_post_user_name_exists(app_and_csrf_token, populated_db):
+    '''Checks the POST form missing fields'''
+    app, token = app_and_csrf_token
+    auth_data = {'username': 'fake',
+                 'password': 'fakefake',
+                 'password_verify': 'fakefake',
+                 'last_name': 'Smith',
+                 'first_name': 'Zeek',
+                 'email': 'fdsa@fdafd',
+                 'phone_number': '43232423423',
+                 'csrf_token': token}
+    response = app.post('/new_user', auth_data, status='2*')
+    assert b'already exists.' in response.body
+
+
+def test_new_user_post_valid(app_and_csrf_token, populated_db):
+    '''Checks the POST form missing fields'''
+    app, token = app_and_csrf_token
+    auth_data = {'username': 'fdsafdsafdsafsa',
+                 'password': 'fakefake',
+                 'password_verify': 'fakefake',
+                 'last_name': 'Smith',
+                 'first_name': 'Zeek',
+                 'email': 'fdsa@fdafd',
+                 'phone_number': '43232423423',
+                 'csrf_token': token}
+    response = app.post('/new_user', auth_data, status='3*')
+    assert response.status_code == 302
 
 
 
