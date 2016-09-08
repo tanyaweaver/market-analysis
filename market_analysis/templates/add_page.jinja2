@@ -1,21 +1,12 @@
 {% extends "layout.jinja2" %}
   {% block body %}
 
+<div class="message-page">
 
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-
-            
-
-            <h3> {{ msg }}</h3>
-      
-              <a href="{{request.route_url('search')}}">Back to search</a>
+      <h3> {{ msg }}</h3>
+      <a href="{{request.route_url('search')}}">Back to search</a>
          
-
+</div>
         
 
 

@@ -7,6 +7,9 @@
           <h1>stoc<span class="span1">K</span><span class="span2">watch</span></h1>
       </div>
 
+  {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+  {% endif %}
 
 
     <form class="form" action="" method="POST">

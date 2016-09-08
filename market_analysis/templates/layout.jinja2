@@ -34,32 +34,32 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                       </button>
-                                  {% if request.authenticated_userid %}
-                                  <a class="navbar-brand" id="logo-small">stoc<span class="span1">K</span><span class="span2">watch</span></a>
-                                  {% endif %}
+                                {% if request.authenticated_userid %}
+                                      <a class="navbar-brand" id="logo-small">stoc<span class="span1">K</span><span class="span2">watch</span></a>
+                                {% endif %}
                     </div>
 
                     <div id="navbar" class="navbar-collapse collapse">
                           <ul class="nav navbar-nav">
                                 {% if request.authenticated_userid %}
-                                  <li ><a href="{{request.route_url('portfolio')}}">Portfolio</a></li>
-                                  <li ><a href="{{request.route_url('search')}}">Search</a></li>
+                                      <li ><a href="{{request.route_url('portfolio')}}">Portfolio</a></li>
+                                      <li ><a href="{{request.route_url('search')}}">Search</a></li>
                                 {% endif %}
                           </ul>
 
-                      <ul class="nav navbar-nav navbar-right">
-                      {% if request.authenticated_userid == 'admin' %}
-                        <li><a href="{{request.route_url('admin')}}">Admin</a></li>
-                        <li><a href="{{request.route_url('logout')}}">Logout</a></li>
-                      {% elif request.authenticated_userid %}
-                        <li><a>Welcome, {{ request.authenticated_userid }}!</a></li>
-                        <li><a href="{{request.route_url('logout')}}">Logout</a></li>
-                      {% else %}
-                        <li><a href="{{request.route_url('login')}}">Log In</a></li>
-                        <li><a href="{{request.route_url('new_user')}}">New User</a></li>
-              
-                      {% endif %}
-                      </ul>
+                          <ul class="nav navbar-nav navbar-right">
+                                {% if request.authenticated_userid == 'admin' %}
+                                      <li><a href="{{request.route_url('admin')}}">Admin</a></li>
+                                      <li><a href="{{request.route_url('logout')}}">Logout</a></li>
+                                {% elif request.authenticated_userid %}
+                                      <li><a>Welcome, {{ request.authenticated_userid }}!</a></li>
+                                      <li><a href="{{request.route_url('logout')}}">Logout</a></li>
+                                {% else %}
+                                      <li><a href="{{request.route_url('login')}}">Log In</a></li>
+                                      <li><a href="{{request.route_url('new_user')}}">New User</a></li>
+                                {% endif %}
+                          </ul>
+
                     </div><!--/.nav-collapse -->
                   </div>
                 </nav>

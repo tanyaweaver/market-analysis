@@ -1,11 +1,13 @@
 .logo {
   font-family: 'Monoton', cursive;
   color: #0a295e;
+  text-align: center;
 }
 
 .logo h1 {
   font-size: 70px;
   margin-bottom: 70px;
+  margin-top: 70px;
 }
 
 .logo .span1 {
@@ -145,7 +147,6 @@ html {
 
 .login-page {
   max-width: 80%;
-  margin-top: 70px;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -164,4 +165,17 @@ html {
 
 .search-input {
   width: 330px;
+}
+
+.page-header {
+  text-align: center;
+}
+
+.centered-button {
+  text-align: center;
+}
+
+.message-page {
+  text-align: center;
+  margin-top: 70px;
 }
