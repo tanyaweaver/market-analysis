@@ -298,11 +298,6 @@ def build_graph(request, elements, percentage=False):
             if percentage:
                 y_vals = convert_to_percentage(y_vals)
 
-            print()
-            print('---------------=-=-=---------------')
-            print('daily totals filled:', daily_totals)
-            print()
-
             stocks[series['Symbol']] = {
                 'y_values': y_vals,
                 'price': price,
@@ -316,17 +311,13 @@ def build_graph(request, elements, percentage=False):
         for tot in daily_totals:
             daily_change.append((tot / daily_totals[0] - 1) * 100)
 
-        print()
-        print("-------------=-=-=----------------------")
-        print('daily_change:', daily_change)
-        print()
-
-        stocks['Total'] = {
-            'y_values': daily_change,
-            'price': total_value,
-            'shares': total_shares,
-            'value': total_value * total_shares,
-        }
+        if percentage:
+            stocks['Total'] = {
+                'y_values': daily_change,
+                'price': total_value,
+                'shares': total_shares,
+                'value': total_value * total_shares,
+            }
 
         export['stocks'] = stocks
         export['total_shares'] = total_shares
