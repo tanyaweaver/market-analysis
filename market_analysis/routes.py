@@ -7,6 +7,7 @@ def includeme(config):
     config.add_route('delete', '/delete/{sym}')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    config.add_route('api_error', '/api_error')
     config.add_route('search', '/search')
     config.add_route('userinfo', '/userinfo')
     config.add_route('admin', '/admin')
