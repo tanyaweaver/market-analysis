@@ -27,7 +27,7 @@
                 <td>
                     <form action="" method="POST">
                       <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
-                      <input type="number" min="0" max="10000" name="amount">
+                      <input type="number" min="0" max="10000" name="amount" value="{{ entry.stocks[stock].shares }}">
                       <input class="btn btn-default" type="Submit" name="{{stock}}" value="Update"/>
                     </form>
                 </td>
