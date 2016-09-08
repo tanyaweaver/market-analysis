@@ -1,4 +1,3 @@
-from webtest import TestApp as _Test_App
 import os
 import pytest
 from pyramid import testing
@@ -10,13 +9,16 @@ from .models import (
 from .models.meta import Base
 import transaction
 from market_analysis.scripts.test_db import STOCKS_100
-# import datetime
 from .models.mymodel import Users, Association, Stocks
 from passlib.apps import custom_app_context as pwd_context
 
 
 OS_USER = os.environ.get('USER', 'tatianaphillips')
-DB_SETTINGS = {'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'.format(OS_USER)}
+DB_SETTINGS = {'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'
+               .format(OS_USER)}
+
+USER_CREDENTIALS = {'username': 'fake', 'password': 'fake'}
+ADMIN_CREDENTIALS = {'username': 'admin', 'password': 'admin'}
 
 
 @pytest.fixture(scope='function')
@@ -49,7 +51,7 @@ def new_session(sqlengine, request):
     return dbsession
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='function')  # db that is used for test_security.py
 def populated_db(sqlengine, request):
     session_factory = get_session_factory(sqlengine)
     dbsession = get_tm_session(session_factory, transaction.manager)
@@ -66,22 +68,21 @@ def populated_db(sqlengine, request):
     request.addfinalizer(teardown)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='function')  # db that is used for tests.py
 def populated_db3(sqlengine, request):
     session_factory = get_session_factory(sqlengine)
     dbsession = get_tm_session(session_factory, transaction.manager)
 
     with transaction.manager:
         user = Users(
-            username=USER_CREDENTIALS['username'],
-            pass_hash=pwd_context.encrypt(USER_CREDENTIALS['password']))
+            username='fake',
+            pass_hash='fake-password')
         dbsession.add(user)
-        
-        # import pdb; pdb.set_trace()
+
         for line in STOCKS_100:
             stock = Stocks(symbol=line[0], name=line[1], exchange='NASDAQ')
             dbsession.add(stock)
-            
+
         association_test = [
                         (1, 1, 10),
                         (1, 2, 10),
@@ -90,7 +91,8 @@ def populated_db3(sqlengine, request):
                         (1, 5, 12),
                         ]
         for tup in association_test:
-            association = Association(user_id=tup[0], stock_id=tup[1], shares=tup[2])
+            association = Association(
+                user_id=tup[0], stock_id=tup[1], shares=tup[2])
             dbsession.add(association)
 
         def teardown():
@@ -112,17 +114,12 @@ def populated_db_admin(sqlengine, request):
             pass_hash=pwd_context.encrypt(ADMIN_CREDENTIALS['password']),
             is_admin=1)
         dbsession.add(user)
-        # import pdb; pdb.set_trace()
 
     def teardown():
         with transaction.manager:
             dbsession.query(Users).delete()
 
     request.addfinalizer(teardown)
-
-
-USER_CREDENTIALS = {'username': 'fake', 'password': 'fake'}
-ADMIN_CREDENTIALS = {'username': 'admin', 'password': 'admin'}
 
 
 @pytest.fixture()
@@ -142,7 +139,7 @@ def auth_app(app_and_csrf_token, populated_db):
         'password': USER_CREDENTIALS['password'],
         'csrf_token': token,
     }
-    response = app.post('/login', auth_data, status='3*')
+    app.post('/login', auth_data, status='3*')
     return app
 
 
@@ -154,7 +151,7 @@ def admin_app(app_and_csrf_token, populated_db_admin):
         'password': ADMIN_CREDENTIALS['password'],
         'csrf_token': token,
     }
-    response = app.post('/login', auth_data, status='3*')
+    app.post('/login', auth_data, status='3*')
     return app, token
 
 
