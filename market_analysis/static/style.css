@@ -34,7 +34,8 @@ input[type=number]{
   color: black;
 }
 
-.navbar-static-top {
+.navbar-brand {
+  font-size: 1.3em;
 }
 
 #admin_table {
