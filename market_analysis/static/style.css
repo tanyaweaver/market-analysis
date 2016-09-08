@@ -198,3 +198,22 @@ html {
   margin-bottom: 3rem;
   font-size: 1.4em;
 }
+
+img {
+  max-width: 200px;
+  max-height: 200px;
+  border-style: thin;
+}
+
+.collaborators {
+  text-align: center;
+}
+
+.collaborators li {
+  display: inline-block;
+  margin: 20px;
+}
+
+.collaborators p {
+  font-size: 20px;
+}

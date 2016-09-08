@@ -1,0 +1,32 @@
+{% extends "layout.jinja2" %}
+  {% block body %}
+  <div class="collaborators">
+    <h1>About</h1>
+        <p>This app is designed to keep track of stocks that can be added to your portfolio.
+        We maintain our user information and associations with a database,
+        and use the <a href="http://dev.markitondemand.com/MODApis/">markIt on demand API</a>
+         to get our information about stocks 
+        in the user's portfolio.  We feature user accounts with two different levels
+        of permissions for views.  Test modules have been created in order to ensure 
+        proper functionality of the website.  To view the portfolio, we display a graph 
+        showing percent changes, and we also have a graph showing price data for each individual stock.</p>
+        <br/>
+        <h1>Collaborators</h1>
+        <ul>            
+                <li>
+                        <a href="http://github.com/bl41r"><image src="/static/assets/mewferns.jpg"/></a>
+                        <p>David Smith</p>
+                </li>
+
+                <li>
+                        <a href="https://github.com/tanyaweaver"><image src="/static/assets/tw.jpeg"/></a>
+                        <p>Tatiana Weaver</p>
+                </li>
+          
+                <li>
+                        <a href="https://github.com/crashtack"><image src="/static/assets/david_banks_photo.jpg"/></a>
+                        <p>David Banks</p>
+                </li>
+        </ul>
+  </div>
+  {% endblock %}

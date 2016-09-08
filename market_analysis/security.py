@@ -5,13 +5,9 @@ from pyramid.security import Everyone, Authenticated
 from pyramid.security import Allow
 from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy.exc import DBAPIError
-# for CSRF security
-from pyramid.session import SignedCookieSessionFactory
+from pyramid.session import SignedCookieSessionFactory  # for CSRF security
 
 from .models import Users
-
-# def check_credentials(username, password):
-#     stored_username =
 
 
 class MyRoot(object):
@@ -28,7 +24,7 @@ class MyRoot(object):
         # import pdb; pdb.set_trace()
         if self.request.authenticated_userid:
             current_user = self.request.dbsession.query(Users).filter(
-                Users.username==self.request.authenticated_userid
+                Users.username == self.request.authenticated_userid
             ).first()
             if current_user and current_user.is_admin:
                 base_list.append((Allow, self.request.authenticated_userid,
@@ -55,10 +51,8 @@ def includeme(config):
     config.set_default_csrf_options(require_csrf=True)
 
 
-
 def check_credentials(request, username, password):
     is_auth = False
-    # import pdb; pdb.set_trace()
     try:
         query = request.dbsession.query(Users)
         user_data = query.filter_by(username=username).first()
