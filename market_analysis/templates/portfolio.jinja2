@@ -10,7 +10,6 @@
       <table class="table table-inverse">
         <thead>
           <tr>
-            <th>#</th>
             <th>Symbol</th>
             <th>%Change in Value</th>
             <th>Current Price</th>
@@ -22,8 +21,9 @@
         </thead>
           <tbody>
             {% for stock in entry.stocks %}
+              {% if stock == 'Total' %}
+              {% else %}
               <tr>
-                <th scope="row">{{ stock.id }}</th>
                 <td><a href="/details/{{ stock }}"><bold>{{ stock }}</bold></a></td>
                 <td>{{ entry.stocks[stock].y_values[-1]}} %</td>
                 <td>{{ entry.stocks[stock].price }}
@@ -43,7 +43,17 @@
                         </form>
                 </td>
               </tr>
+              {% endif %}
             {% endfor %}
+            <tr>
+              <td>Total</td>
+              <td>{{ entry.stocks['Total'].y_values[-1]}} %</td>
+              <td>{{ entry.stocks['Total'].price }}</td>
+              <td>{{ entry.stocks['Total'].shares }}</td>
+              <td>{{ (entry.stocks['Total'].shares / entry.total_shares)|round(3) }}</td>
+              <td>{{ (entry.stocks['Total'].value / entry.total_value)|round(3) }}</td>
+              <td></td>
+            </tr>            
           </table>
           <span class="Summary">Total Value of Portfolio: {{ entry.total_value }} USD</span>
   

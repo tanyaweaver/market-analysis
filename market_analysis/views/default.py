@@ -288,12 +288,17 @@ def build_graph(request, elements, percentage=False):
 
         stocks = {}
         for series in entries['Elements']:
-            y_vals = series['DataSeries']['close']['values']
-            price = y_vals[-1]
             current_stock_id = request.dbsession.query(Stocks).filter(Stocks.symbol == series['Symbol']).first().id
             shares = request.dbsession.query(Association).filter(Association.stock_id == current_stock_id).first().shares
-            total_shares += shares
-            total_value += price * shares
+
+            y_vals = series['DataSeries']['close']['values']
+            price = y_vals[-1]
+
+            if not shares:
+                shares = 0
+            shares = int(shares)
+            total_shares += (shares)
+            total_value += (price) * (shares)
 
             for i in range(len(y_vals)):
                 daily_totals[i] += (y_vals[i] * shares)
@@ -312,19 +317,19 @@ def build_graph(request, elements, percentage=False):
 
         daily_change = []
         for tot in daily_totals:
-            daily_change.append((tot / daily_totals[0] - 1) * 100)
+            daily_change.append(round(((tot / daily_totals[0] - 1) * 100), 5))
 
         if percentage:
             stocks['Total'] = {
                 'y_values': daily_change,
-                'price': total_value,
+                'price': round(total_value, 2),
                 'shares': total_shares,
-                'value': total_value * total_shares,
+                'value': round(total_value, 2),
             }
 
         export['stocks'] = stocks
         export['total_shares'] = total_shares
-        export['total_value'] = total_value
+        export['total_value'] = round((total_value), 2)
 
         print(export)
         return {'entry': export}
