@@ -10,7 +10,6 @@
             <th>%Change in Value</th>
             <th>Current Price</th>
             <th>Shares</th>
-            <th>% Shares of Portfolio</th>
             <th>% Value of Portfolio</th>
             <th></th>
           </tr>
@@ -31,10 +30,8 @@
                     </form>
                 </td>
                 {% if entry.stocks[stock].shares > 0 %}
-                <td>{{ (entry.stocks[stock].shares / entry.total_shares)|round(3) }}</td>
-                <td>{{ (entry.stocks[stock].value / entry.total_value)|round(3) }}</td>
+                <td>{{ (entry.stocks[stock].value * 100 / entry.total_value)|round(3) }}</td>
                 {% else %}
-                <td>0</td>
                 <td>0</td>
                 {% endif %}
                 <td>
@@ -56,10 +53,8 @@
               <td>{{ entry.stocks['Total'].price }}</td>
               <td>{{ entry.stocks['Total'].shares }}</td>
               {% if entry.stocks['Total'].shares > 0 %}
-              <td>{{ (entry.stocks['Total'].shares / entry.total_shares)|round(3) }}</td>
-              <td>{{ (entry.stocks['Total'].value / entry.total_value)|round(3) }}</td>
+              <td>{{ (entry.stocks['Total'].value * 100 / entry.total_value)|round(3) }}</td>
               {% else %}
-              <td></td>
               <td></td>
               {% endif %}
               <td></td>
