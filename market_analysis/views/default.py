@@ -135,8 +135,6 @@ def portfolio(request):
             elements.append({'Symbol': str(stock),
                              'Type': 'price', 'Params': ['c']})
         return build_graph(request, elements, True)
-        #return build_graph(request, elements, msg, True)
-
 
 
 @view_config(route_name='details', renderer="../templates/details.jinja2",
@@ -144,6 +142,7 @@ def portfolio(request):
 def single_stock_details(request):
     """Details for single-stock."""
     entries = {}
+    elements = []
     msg = ''
     sym = request.matchdict['sym']
     resp = requests.get('http://dev.markitondemand.com/'
@@ -153,14 +152,19 @@ def single_stock_details(request):
         if 'Message' in entries.keys():
             msg = 'Bad request.'
             entries = {}
-        elements = []
         elements.append({'Symbol': str(sym), 'Type': 'price', 'Params': ['c']})
     else:
         entries = {}
         msg = 'Could not fulfill the request.'
     temp = build_graph(request, elements)
-    temp['info'] = entries
-    temp['msg'] = msg
+    try:
+        temp['info'] = entries
+        temp['msg'] = msg
+    except TypeError:
+        temp = {}
+        temp['info'] = entries
+        msg = 'Trouble connecting to API.'
+        temp['msg'] = msg
     return temp
 
 
@@ -213,7 +217,7 @@ def login(request):
                 query = request.dbsession.query(Users)
                 user = query.filter_by(username=username).first()
                 user.date_last_logged = datetime.datetime.now()
-            except DBAPIError:
+            except DBAPIError:  # pragma: no cover
                 return Response(db_err_msg, content_type='text/plain',
                                 status=500)
             return HTTPFound(location=request.route_url('portfolio'),
@@ -283,7 +287,6 @@ def build_graph(request, elements, percentage=False):
             price = y_vals[-1]
             if percentage:
                 y_vals = convert_to_percentage(y_vals)
-
             current_stock_id = request.dbsession.query(Stocks).filter(Stocks.symbol == series['Symbol']).first().id
             shares = request.dbsession.query(Association).filter(Association.stock_id == current_stock_id).first().shares
 

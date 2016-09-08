@@ -19,7 +19,7 @@ OS_USER = os.environ.get('USER', 'tatianaphillips')
 DB_SETTINGS = {'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'.format(OS_USER)}
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def sqlengine(request):
     config = testing.setUp(settings=DB_SETTINGS)
     config.include('.models')
@@ -49,8 +49,25 @@ def new_session(sqlengine, request):
     return dbsession
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def populated_db(sqlengine, request):
+    session_factory = get_session_factory(sqlengine)
+    dbsession = get_tm_session(session_factory, transaction.manager)
+
+    with transaction.manager:
+        user = Users(
+            username=USER_CREDENTIALS['username'],
+            pass_hash=pwd_context.encrypt(USER_CREDENTIALS['password']))
+        dbsession.add(user)
+
+        def teardown():
+            with transaction.manager:
+                dbsession.query(Users).delete()
+    request.addfinalizer(teardown)
+
+
+@pytest.fixture(scope='function')
+def populated_db3(sqlengine, request):
     session_factory = get_session_factory(sqlengine)
     dbsession = get_tm_session(session_factory, transaction.manager)
 
@@ -76,18 +93,15 @@ def populated_db(sqlengine, request):
             association = Association(user_id=tup[0], stock_id=tup[1], shares=tup[2])
             dbsession.add(association)
 
-
         def teardown():
             with transaction.manager:
                 dbsession.query(Association).delete()
                 dbsession.query(Users).delete()
                 dbsession.query(Stocks).delete()
-            
-
     request.addfinalizer(teardown)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def populated_db_admin(sqlengine, request):
     session_factory = get_session_factory(sqlengine)
     dbsession = get_tm_session(session_factory, transaction.manager)
