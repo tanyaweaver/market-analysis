@@ -6,11 +6,11 @@
 
   {% if message %}
     <div class="alert alert-success" role="alert">
-      <p>{{ message }}</p>
+      <p id='admin'>{{ message }}</p>
       <form action='/admin' method="POST">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
-        <button type="submit" class="btn btn-primary btn-sm" name="username" value="{{ {'utd': user_to_delete} }}">Confirm
-        </button>
+        <button id='green' type="submit" class="btn btn-primary btn-sm" name="username" value="DELETE_ME_NOW">DELETE</button>
+        <button id='red' type="submit" class="btn btn-primary btn-sm" name="username" value="CANCEL">CANCEL</button>
       </form>
     </div>
 

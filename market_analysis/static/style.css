@@ -179,3 +179,16 @@ html {
   text-align: center;
   margin-top: 70px;
 }
+
+#green {
+  background-color: green;
+}
+
+#red {
+  background-color: red;
+}
+
+#admin {
+  margin-bottom: 3rem;
+  font-size: 1.4em;
+}

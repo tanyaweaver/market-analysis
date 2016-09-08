@@ -81,6 +81,7 @@ def delete_stock_from_portfolio(request):
             request.dbsession.delete(query_del)
             msg = request.matchdict['sym'] + ' was removed from'\
                 ' your portfolio.'
+
         except (AttributeError, UnmappedInstanceError):
             msg = 'Failed: tried to remove a stock that is not in the'\
                 ' portfolio.'
@@ -179,18 +180,21 @@ def admin(request):
         them to change and update user information, or remove user'''
     message = user_to_delete = ''
     if request.method == 'POST':
-        # import pdb; pdb.set_trace()
-        if request.POST['username'] and \
-           (request.session['user_to_delete'] == ''):
+        if (request.POST['username'] != 'DELETE_ME_NOW') and \
+           (request.POST['username'] != 'CANCEL'):
             username = request.POST['username']
-            message = 'Are you sure you want to delete user {}?'.format(username)
+            message = 'Are you sure you want to delete user {}?'\
+                      .format(username)
             request.session['user_to_delete'] = username
-        else:
-            # request.POST['username'] == 'DELETE_ME_NOW!':
-            message = 'Cool, that dick is gone!'
-            # TODO: add the deletion here
+        elif request.POST['username'] == 'DELETE_ME_NOW':
+            username = request.session['user_to_delete']
+            query = request.dbsession.query(Users)\
+                .filter(Users.username == username).first()
+            request.dbsession.delete(query)
             request.session['user_to_delete'] = ''
-            
+        elif request.POST['username'] == 'CANCEL':
+            request.session['user_to_delete'] = ''
+
     try:
         query = request.dbsession.query(Users)
         users = query.all()
