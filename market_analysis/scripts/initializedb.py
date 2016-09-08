@@ -47,40 +47,6 @@ def main(argv=sys.argv):
     with transaction.manager:
         dbsession = get_tm_session(session_factory, transaction.manager)
 
-        #user_test = [
-        #            'Tom',
-        #            'Linda',
-        #            'Sally',
-        #            'Harold'
-        #            ]
-
-        #for name in user_test:
-        #    date = datetime.datetime.now()
-        #    user = Users(username=name, first_name=name, last_name='', email='', email_verified=True, date_joined=date, date_last_logged=date, pass_hash='seekrit', phone_number='', phone_number_verified=True, active=True, password_last_changed=date, password_expired=False)
-        #    dbsession.add(user)
-
-        for line in STOCKS_100:
-            stock = Stocks(symbol=line[0], name=line[1], exchange='NASDAQ')
-            dbsession.add(stock)
-
-        association_test = [
-                            (1, 1, 10),
-                            (1, 2, 10),
-                            (1, 3, 10),
-                            (2, 1, 9),
-                            (2, 4, 9),
-                            (2, 3, 9)]
-        for tup in association_test:
-            association = Association(user_id=tup[0], stock_id=tup[1], shares=tup[2])
-            dbsession.add(association)
-
-    # import pdb; pdb.set_trace()
-
-    # session_factory = get_session_factory(engine)
-    #
-    # with transaction.manager:
-    #     dbsession = get_tm_session(session_factory, transaction.manager)
-    #     # import pdb; pdb.set_trace()
         for line in FAKEUSERS:
             user = Users(username=line['username'],
                          first_name=line['first_name'],
@@ -98,3 +64,17 @@ def main(argv=sys.argv):
                          is_admin=line['is_admin'],
                          )
             dbsession.add(user)
+
+        for line in STOCKS_100:
+            stock = Stocks(symbol=line[0], name=line[1], exchange='NASDAQ')
+            dbsession.add(stock)
+
+        association_test = [(1, 1, 10),
+                            (1, 2, 10),
+                            (1, 3, 10),
+                            (2, 1, 9),
+                            (2, 4, 9),
+                            (2, 3, 9)]
+        for tup in association_test:
+            association = Association(user_id=tup[0], stock_id=tup[1], shares=tup[2])
+            dbsession.add(association)
