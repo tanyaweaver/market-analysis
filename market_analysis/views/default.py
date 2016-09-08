@@ -54,7 +54,7 @@ def add_stock_to_portfolio(request):
             list_of_stock_ids.append(row.stock_id)
         if int(new_stock_id) not in list_of_stock_ids:
             association_row = Association(user_id=current_user_id,
-                                          stock_id=new_stock_id)
+                                          stock_id=new_stock_id, shares=0)
             request.dbsession.add(association_row)
             msg = request.matchdict['name'] + ' was added to your portfolio.'
         else:
@@ -280,8 +280,11 @@ def build_graph(request, elements, percentage=False):
             Users.username == request.authenticated_userid
         ).first().id
         for series in entries['Elements']:
-            current_stock_id = request.dbsession.query(Stocks).filter(Stocks.symbol == series['Symbol']).first().id
-            shares = request.dbsession.query(Association).filter(and_(Association.stock_id == current_stock_id, Association.user_id == current_user_id)).first().shares
+            current_stock_id = request.dbsession.query(Stocks)\
+                .filter(Stocks.symbol == series['Symbol']).first().id
+            shares = request.dbsession.query(Association).\
+                filter(and_(Association.stock_id == current_stock_id,
+                       Association.user_id == current_user_id)).first().shares
 
             y_vals = series['DataSeries']['close']['values']
             price = y_vals[-1]
@@ -311,7 +314,8 @@ def build_graph(request, elements, percentage=False):
         daily_change = []
         for tot in daily_totals:
             if daily_totals[0] > 0:
-                daily_change.append(round(((tot * 100 / daily_totals[0]) - 100), 5))
+                daily_change\
+                    .append(round(((tot * 100 / daily_totals[0]) - 100), 5))
             else:
                 daily_change.append(0)
 
@@ -333,6 +337,7 @@ def build_graph(request, elements, percentage=False):
     else:
         print('Error connecting to API')
         print(resp.status_code)
+        return {'entry': {}}
 
 
 @view_config(route_name='new_user', renderer='templates/new_user.jinja2')
