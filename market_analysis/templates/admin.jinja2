@@ -1,0 +1,52 @@
+{% extends "layout.jinja2" %}
+{% block body %}
+
+      <h2>Admin.jinja2</h2>
+      <p>Display a list of user info populated from the User table. Provide options to Remove user, Request a password updated Etc</p>
+
+      {% if message %}
+        <div class="alert alert-success" role="alert">{{ message }}</div>
+      {% endif %}
+
+  <table class="table table-inverse" id="admin_table">
+    <thead>
+      <tr>
+        <th>ID #</th>
+        <th>username</th>
+        <th>first name</th>
+        <th>last name</th>
+        <th>email</th>
+        <th>email ver</th>
+        <th>sms #</th>
+        <th>sms # ver</th>
+        <th>active</th>
+        <th>date joined</th>
+        <th>date last logged</th>
+        <th>Admin?</th>
+        <th></th>
+      </tr>
+    </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <th scope="row">{{ user.id }}</th>
+            <td><bold>{{ user.username }}</bold></td>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.last_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.email_verified }}</td>
+            <td>{{ user.phone_number }}</td>
+            <td>{{ user.phone_number_verified }}</td>
+            <td>{{ user.active }}</td>
+            <td>{{ user.date_joined }}</td>
+            <td>{{ user.date_last_logged }}</td>
+            <td>{{ user.is_admin  }}</td>
+            <form action='/admin' method="POST">
+              <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
+              <td><button type="submit" class="btn btn-primary btn-sm" name="username" value={{ user.username }}>Delete</button></tb>
+            </form>
+          </tr>
+        {% endfor %}
+  </table>
+
+{% endblock %}

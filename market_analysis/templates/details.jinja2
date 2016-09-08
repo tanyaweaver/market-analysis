@@ -1,0 +1,79 @@
+{% extends "layout.jinja2" %}
+  {% block body %}
+        {% if not entry.error %}
+        <article class="single-entry">
+          <h3>Name: {{ info.Name }}&nbsp;&nbsp;&nbsp;&nbsp;Symbol: {{ info.Symbol }}</h3>
+          <p><span class="bold">LastPrice:</span> {{ info.LastPrice }}&nbsp;&nbsp;
+            <span class="bold">Open:</span> {{ info.Open }}&nbsp;&nbsp;
+            <span class="bold">High:</span> {{ info.High }}&nbsp;&nbsp;
+            <span class="bold">Low:</span> {{ info.Low }}
+          </p>
+          <p><span class="bold">ChangePercent:</span> {{ info.ChangePercent }}</p>
+          <p><span class="bold">Volume:</span> {{ info.Volume }}</p>
+          <p><span class="bold">MarketCap:</span> {{ info.MarketCap }}</p>
+          <p><span class="bold">ChangePercentYTD:</span> {{ info.ChangePercentYTD }}</p>
+        </article>
+            <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {packages: ['corechart', 'line']});
+        google.charts.setOnLoadCallback(drawCrosshairs);
+
+    function drawCrosshairs() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'X');
+    {% for stock in entry.stocks %}
+      data.addColumn('number', '{{ stock }}');
+    {% endfor %}
+      rowData = [];
+    {% for date in entry.dates %}
+      rowData.push(['{{ date }}']);
+    {% endfor %}
+
+    for (i = 0; i < rowData.length; i++) {
+        {% for stock, val in entry.stocks.items() %}
+            rowData[i].push({{val.y_values}}[i]);
+        {% endfor %}
+    };
+    data.addRows(rowData)
+
+      var options = {
+        hAxis: {
+          title: 'Time'
+        },
+        vAxis: {
+          title: 'Price'
+        },
+        pointSize: 8,
+        title: '{{ stock }}',
+        height: 400,
+        crosshair: {
+          color: '#000',
+          trigger: 'selection'
+        },
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+      chart.draw(data, options);
+      chart.setSelection([{row: 38, column: 1}]);
+
+    }
+    </script>
+
+    <div id="chart_div"></div>
+
+
+
+
+
+        {% endif %}
+
+        {% if entry.error %}
+        <h3>There was an error.</h3>
+        <h4>{{ entry.error }} - Remove this later.</h4>
+        {% endif %}
+
+
+
+
+  {% endblock %}
