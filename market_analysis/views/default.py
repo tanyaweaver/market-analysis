@@ -3,6 +3,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 from sqlalchemy.exc import DBAPIError
+from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy import and_, or_
 try:
     from urllib.parse import urlencode
@@ -80,7 +81,7 @@ def delete_stock_from_portfolio(request):
             request.dbsession.delete(query_del)
             msg = request.matchdict['sym'] + ' was removed from'\
                 ' your portfolio.'
-        except AttributeError:
+        except (AttributeError, UnmappedInstanceError):
             msg = 'Failed: tried to remove a stock that is not in the'\
                 ' portfolio.'
     else:
@@ -272,13 +273,13 @@ def build_graph(request, elements, percentage=False):
             'Elements': elements
         }
     }
+    total_shares = 0
+    total_value = 0
 
     resp = requests.get(url, params=urlencode(req_obj))
 
     if resp.status_code == 200:
 
-        total_shares = 0
-        total_value = 0
         entries = {}
         for key, value in resp.json().items():
             entries[key] = value
@@ -290,7 +291,7 @@ def build_graph(request, elements, percentage=False):
         export['x_values'] = entries['Positions']
 
         daily_totals = [0 for j in range(len(export['x_values']))]
-
+        stocks = {}
         current_user_id = request.dbsession.query(Users).filter(
             Users.username == request.authenticated_userid
         ).first().id
@@ -316,7 +317,6 @@ def build_graph(request, elements, percentage=False):
             if percentage:
                 y_vals = convert_to_percentage(y_vals)
 
-            stocks = {}
             stocks[series['Symbol']] = {
                 'y_values': y_vals,
                 'price': price,
