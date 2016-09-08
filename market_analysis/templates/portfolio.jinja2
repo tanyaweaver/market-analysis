@@ -10,7 +10,6 @@
       <table class="table table-inverse">
         <thead>
           <tr>
-            <th>#</th>
             <th>Symbol</th>
             <th>%Change in Value</th>
             <th>Current Price</th>
@@ -25,7 +24,6 @@
               {% if stock == 'Total' %}
               {% else %}
               <tr>
-                <th scope="row">{{ stock.id }}</th>
                 <td><a href="/details/{{ stock }}"><bold>{{ stock }}</bold></a></td>
                 <td>{{ entry.stocks[stock].y_values[-1]}} %</td>
                 <td>{{ entry.stocks[stock].price }}
@@ -48,7 +46,6 @@
               {% endif %}
             {% endfor %}
             <tr>
-              <th scope="row"></th>
               <td>Total</td>
               <td>{{ entry.stocks['Total'].y_values[-1]}} %</td>
               <td>{{ entry.stocks['Total'].price }}</td>
