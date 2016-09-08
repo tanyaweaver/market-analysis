@@ -19,7 +19,9 @@ DB_SETTINGS = {'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'
                .format(OS_USER)}
 
 USER_CREDENTIALS = {'username': 'fake', 'password': 'fake'}
+USER_PASS_HASH = pwd_context.encrypt(USER_CREDENTIALS['password'])
 ADMIN_CREDENTIALS = {'username': 'admin', 'password': 'admin'}
+ADMIN_PASS_HASH = pwd_context.encrypt(ADMIN_CREDENTIALS['password'])
 
 
 @pytest.fixture(scope='function')
@@ -60,7 +62,7 @@ def populated_db(sqlengine, request):
     with transaction.manager:
         user = Users(
             username=USER_CREDENTIALS['username'],
-            pass_hash=pwd_context.encrypt(USER_CREDENTIALS['password']))
+            pass_hash=USER_PASS_HASH)
         dbsession.add(user)
 
         def teardown():
@@ -84,13 +86,12 @@ def populated_db3(sqlengine, request):
             stock = Stocks(symbol=line[0], name=line[1], exchange='NASDAQ')
             dbsession.add(stock)
 
-        association_test = [
-                        (1, 1, 10),
-                        (1, 2, 10),
-                        (1, 3, 10),
-                        (1, 4, 13),
-                        (1, 5, 12),
-                        ]
+        association_test = [(1, 1, 10),
+                            (1, 2, 10),
+                            (1, 3, 10),
+                            (1, 4, 13),
+                            (1, 5, 12),
+                            ]
         for tup in association_test:
             association = Association(
                 user_id=tup[0], stock_id=tup[1], shares=tup[2])
@@ -112,7 +113,7 @@ def populated_db_admin(sqlengine, request):
     with transaction.manager:
         user = Users(
             username=ADMIN_CREDENTIALS['username'],
-            pass_hash=pwd_context.encrypt(ADMIN_CREDENTIALS['password']),
+            pass_hash=ADMIN_PASS_HASH,
             is_admin=1)
         dbsession.add(user)
 
@@ -163,26 +164,3 @@ def app_and_csrf_token(app):
     input_ = response.html.find('input', attrs={'name': 'csrf_token'})
     token = input_.attrs['value']
     return app, token
-
-# PASSWORD = 'secret password'
-# ENCRYPTED_PASSWORD = pwd_context.encrypt(PASSWORD)
-#
-#
-# @pytest.fixture(scope='function')
-# def auth_env():
-#     username = 'banksd'
-#     os.environ['AUTH_USERNAME'] = username
-#     os.environ['AUTH_PASSWORD'] = ENCRYPTED_PASSWORD
-#
-#     return username, PASSWORD
-# #
-# #
-# @pytest.fixture(scope="function")
-# def authenticated_app(auth_env, new_session):
-#     app, token = app_and_csrf_token
-#     actual_username, actual_password = auth_env
-#     auth_data = {'username': actual_username,
-#                  'password': actual_password,
-#                  'csrf_token': token}
-#     response = app.post('/login', auth_data, status='3*')
-#     return app
