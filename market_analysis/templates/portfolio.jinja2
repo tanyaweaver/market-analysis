@@ -13,6 +13,7 @@
             <th>#</th>
             <th>Symbol</th>
             <th>%Change in Value</th>
+            <th>Current Price</th>
             <th>Shares</th>
             <th>% of Portfolio</th>
             <th></th>
@@ -24,10 +25,11 @@
                 <th scope="row">{{ stock.id }}</th>
                 <td><a href="/details/{{ stock }}"><bold>{{ stock }}</bold></a></td>
                 <td>{{ entry.stocks[stock].y_values[-1]}} %</td>
+                <td>{{ entry.stocks[stock].price }}
                 <td>
                     <form action="" method="POST">
                       <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
-                      <input type="number" min="0" max="10000" name="amount">
+                      <input type="number" min="0" max="10000" name="amount" value="{{ entry.stocks[stock].shares }}">
                       <input class="btn btn-default" type="Submit" name="{{stock}}" value="Update"/>
                     </form>
                 </td>

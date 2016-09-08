@@ -123,8 +123,6 @@ def portfolio(request):
             .filter(and_(current_stock_id == Association.stock_id,
                 Association.user_id == current_user_id)).update({Association.shares: updated_amount})
 
-
-    
     list_of_stock_ids = []
     msg = "Go to Search to add stocks to watch or click on Symbol to see details."
     for row in query:
@@ -282,19 +280,24 @@ def build_graph(request, elements, percentage=False):
         for series in entries['Elements']:
             y_vals = series['DataSeries']['close']['values']
 
+            price = y_vals[-1]
             if percentage:
                 y_vals = convert_to_percentage(y_vals)
 
+            current_stock_id = request.dbsession.query(Stocks).filter(Stocks.symbol == series['Symbol']).first().id
+            shares = request.dbsession.query(Association).filter(Association.stock_id == current_stock_id).first().shares
+
             stocks[series['Symbol']] = {
                 'y_values': y_vals,
+                'price': price,
                 'currency': series['Currency'],
                 'max': series['DataSeries']['close']['max'],
                 'min': series['DataSeries']['close']['min'],
+                'shares': shares,
             }
 
         export['stocks'] = stocks
 
-        # export['msg'] = msg
         print(export)
         return {'entry': export}
 
