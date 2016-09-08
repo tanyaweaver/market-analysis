@@ -77,11 +77,11 @@ def delete_stock_from_portfolio(request):
                 .filter(and_(Association.stock_id == query.id,
                              Association.user_id == current_user_id)).first()
             request.dbsession.delete(query_del)
-            msg = request.matchdict['sym'] + ' was removed from'
-            'your portfolio.'
+            msg = request.matchdict['sym'] + ' was removed from'\
+                ' your portfolio.'
         except AttributeError:
-            msg = 'Failed: tried to remove a stock that is not in the'
-            ' portfolio.'
+            msg = 'Failed: tried to remove a stock that is not in the'\
+                ' portfolio.'
     else:
         msg = 'Failed: improper request.'
     return {'msg': msg}
