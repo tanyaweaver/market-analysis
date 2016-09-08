@@ -307,6 +307,8 @@ def build_graph(request, elements, percentage=False):
             }
 
         daily_change = []
+        if daily_totals[0] == 0 and not percentage:
+            daily_totals[0] == 1
         for tot in daily_totals:
             daily_change.append(round(((tot / daily_totals[0] - 1) * 100), 5))
 
