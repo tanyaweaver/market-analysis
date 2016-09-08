@@ -1,3 +1,41 @@
+.logo {
+  font-family: 'Monoton', cursive;
+  color: #0a295e;
+}
+
+.logo h1 {
+  font-size: 70px;
+  margin-bottom: 70px;
+}
+
+.logo .span1 {
+  color: #3c1518;
+ }
+
+.logo .span2 {
+ font-family: 'Oswald', sans-serif;
+ color: #0b104d;
+}
+
+#logo-small {
+  font-family: 'Monoton', cursive;
+  color: #0a295e;
+}
+
+#logo-small h1 {
+  font-size: 60px;
+  margin-bottom: 70px;
+}
+
+#logo-small .span1 {
+  color: #3c1518;
+ }
+
+#logo-small .span2 {
+ font-family: 'Oswald', sans-serif;
+ color: #0b104d;
+}
+
 body {
   min-height: 500px;
   font-family: 'Muli', sans-serif;
@@ -30,8 +68,8 @@ input[type=number]{
   border-radius: 4px;
 }
 
-.navbar {
-  color: black;
+#navbar-colored {
+  color: #0b104d;
 }
 
 .navbar-static-top {
@@ -102,4 +140,27 @@ html {
 .single-stock {
   max-width: 400px;
   margin: 0 auto;
+}
+
+.login-page {
+  max-width: 80%;
+  margin-top: 70px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.row {
+  text-align: center;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+#colored-button {
+  background-color: #0b104d;
+  color: white;
+}
+
+.search-input {
+  width: 330px;
 }
