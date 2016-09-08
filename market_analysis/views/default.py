@@ -187,6 +187,7 @@ def admin(request):
                       .format(username)
             request.session['user_to_delete'] = username
         elif request.POST['username'] == 'DELETE_ME_NOW':
+            # TODO: add a check so the admin user cannot be deleted
             username = request.session['user_to_delete']
             query = request.dbsession.query(Users)\
                 .filter(Users.username == username).first()
