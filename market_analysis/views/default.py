@@ -32,6 +32,7 @@ def search_stocks(request):
                         Stocks.symbol.startswith(search2)))
         except DBAPIError:  # pragma: no cover
             return Response(db_err_msg, content_type='text/plain', status=500)
+        
         for row in search_query:
             search_results.append(row)
         if len(search_results) == 0:
