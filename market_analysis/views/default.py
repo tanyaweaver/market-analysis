@@ -225,7 +225,6 @@ def logout(request):
 
 
 def format_dates(date_list):
-    """Shorten date format."""
     ret_list = []
     for date in date_list:
         date = date[5:10]
@@ -244,6 +243,7 @@ def convert_to_percentage(y_vals):
 
 
 def build_graph(request, elements, percentage=False):
+# def build_graph(request, elements, msg):
     """Builds the graph from an API request."""
 
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
@@ -308,7 +308,7 @@ def build_graph(request, elements, percentage=False):
 
         daily_change = []
         if daily_totals[0] == 0 and not percentage:
-            daily_totals[0] == 1
+            daily_totals[0] = 1
         for tot in daily_totals:
             daily_change.append(round(((tot / daily_totals[0] - 1) * 100), 5))
 
