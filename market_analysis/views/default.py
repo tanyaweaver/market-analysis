@@ -276,9 +276,12 @@ def build_graph(request, elements, percentage=False):
         daily_totals = [0 for j in range(len(export['x_values']))]
 
         stocks = {}
+        current_user_id = request.dbsession.query(Users).filter(
+            Users.username == request.authenticated_userid
+        ).first().id
         for series in entries['Elements']:
             current_stock_id = request.dbsession.query(Stocks).filter(Stocks.symbol == series['Symbol']).first().id
-            shares = request.dbsession.query(Association).filter(Association.stock_id == current_stock_id).first().shares
+            shares = request.dbsession.query(Association).filter(and_(Association.stock_id == current_stock_id, Association.user_id == current_user_id)).first().shares
 
             y_vals = series['DataSeries']['close']['values']
             price = y_vals[-1]
