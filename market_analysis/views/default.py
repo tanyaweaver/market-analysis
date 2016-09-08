@@ -1,21 +1,16 @@
 from pyramid.response import Response
 from pyramid.view import view_config
-
 from pyramid.httpexceptions import HTTPFound
-
+from pyramid.security import remember, forget
 from sqlalchemy.exc import DBAPIError
-from sqlalchemy import and_
-
-from ..models import Stocks, Users, Association
+from sqlalchemy import and_, or_
 try:
     from urllib.parse import urlencode
 except ImportError:     # pragma: no cover
     from urllib import urlencode
-
-from pyramid.security import remember, forget
+from ..models import Stocks, Users, Association
 from ..security import check_credentials
 from passlib.apps import custom_app_context as pwd_context
-
 import datetime
 import requests
 
@@ -30,8 +25,11 @@ def search_stocks(request):
     elif request.method == 'POST':
         try:
             search = request.params.get('search')
+            search1 = search.lower().capitalize()
+            search2 = search.upper()
             search_query = request.dbsession.query(Stocks)\
-                .filter(Stocks.name.startswith(search.lower().capitalize()))
+                .filter(or_(Stocks.name.startswith(search1),
+                        Stocks.symbol.startswith(search2)))
         except DBAPIError:  # pragma: no cover
             return Response(db_err_msg, content_type='text/plain', status=500)
         for row in search_query:
@@ -49,12 +47,14 @@ def add_stock_to_portfolio(request):
                 Users.username == request.authenticated_userid
             ).first().id
         new_stock_id = request.matchdict['id']
-        query = request.dbsession.query(Association).filter(Association.user_id == current_user_id)
+        query = request.dbsession.query(Association)\
+            .filter(Association.user_id == current_user_id)
         list_of_stock_ids = []
         for row in query:
             list_of_stock_ids.append(row.stock_id)
         if int(new_stock_id) not in list_of_stock_ids:
-            association_row = Association(user_id=current_user_id, stock_id=new_stock_id)
+            association_row = Association(user_id=current_user_id,
+                                          stock_id=new_stock_id)
             request.dbsession.add(association_row)
             msg = request.matchdict['name'] + ' was added to your portfolio.'
         else:
@@ -77,9 +77,11 @@ def delete_stock_from_portfolio(request):
                 .filter(and_(Association.stock_id == query.id,
                              Association.user_id == current_user_id)).first()
             request.dbsession.delete(query_del)
-            msg = request.matchdict['sym'] + ' was removed from your portfolio.'
+            msg = request.matchdict['sym'] + ' was removed from'
+            'your portfolio.'
         except AttributeError:
-            msg = 'Failed: tried to remove a stock that is not in the portfolio.'
+            msg = 'Failed: tried to remove a stock that is not in the'
+            ' portfolio.'
     else:
         msg = 'Failed: improper request.'
     return {'msg': msg}
@@ -101,11 +103,10 @@ def pubic(request):
 @view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2",
              permission='secret')
 def portfolio(request):
-    '''
+    """
     The main user portfolio page, displays a list of
-    their stocks and a graph.
-    '''
-    #import pdb;pdb.set_trace()
+    their stocks and a graph. Update number of shares.
+    """
     current_user_id = request.dbsession.query(Users).filter(
                 Users.username == request.authenticated_userid
             ).first().id
@@ -118,13 +119,14 @@ def portfolio(request):
         for item, val in request.POST.items():
             if val == 'Update':
                 updated_stock = item
-        current_stock_id = request.dbsession.query(Stocks).filter(Stocks.symbol == updated_stock).first().id
+        current_stock_id = request.dbsession.query(Stocks)\
+            .filter(Stocks.symbol == updated_stock).first().id
         request.dbsession.query(Association)\
             .filter(and_(current_stock_id == Association.stock_id,
-                Association.user_id == current_user_id)).update({Association.shares: updated_amount})
+                    Association.user_id == current_user_id))\
+            .update({Association.shares: updated_amount})
 
     list_of_stock_ids = []
-    msg = "Go to Search to add stocks to watch or click on Symbol to see details."
     for row in query:
         list_of_stock_ids.append(row.child.symbol)
     if len(list_of_stock_ids) == 0:
@@ -168,19 +170,11 @@ def single_stock_details(request):
     return temp
 
 
-# @view_config(route_name='userinfo', renderer="../templates/userinfo.jinja2")
-# def userinfo(request):
-#     '''A page to display a users information to the user and allow them to
-#         change and update it, or removethemselves from the list of users'''
-#     return {'message': 'User info page'}
-
-
 @view_config(route_name='admin', renderer="../templates/admin.jinja2",
              permission='admin')
 def admin(request):
     '''A page to display a users information to the site adimn and allow
         them to change and update user information, or remove user'''
-    # import pdb; pdb.set_trace()
     message = ''
     if request.method == 'POST':
         username = request.POST['username']
@@ -206,11 +200,8 @@ def home(request):
 @view_config(route_name='login', renderer='templates/login.jinja2')
 def login(request):
     if request.method == 'POST':
-        # import pdb; pdb.set_trace()
-
         username = request.params.get('username', '')
         password = request.params.get('password', '')
-        # import pdb; pdb.set_trace()
         if check_credentials(request, username, password):
             headers = remember(request, username)
             try:
@@ -234,6 +225,7 @@ def logout(request):
 
 
 def format_dates(date_list):
+    """Shorten date format."""
     ret_list = []
     for date in date_list:
         date = date[5:10]
@@ -252,7 +244,6 @@ def convert_to_percentage(y_vals):
 
 
 def build_graph(request, elements, percentage=False):
-# def build_graph(request, elements, msg):
     """Builds the graph from an API request."""
 
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
