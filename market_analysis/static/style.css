@@ -161,6 +161,12 @@ html {
 #colored-button {
   background-color: #0b104d;
   color: white;
+  transition: all 0.35s ease;
+}
+
+#colored-button:hover {
+  color: #0b104d;
+  background-color: white;
 }
 
 .search-input {

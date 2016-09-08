@@ -265,6 +265,28 @@ def convert_to_percentage(y_vals):
     return ret_list
 
 
+def prepare_daily_changes(daily_totals):
+    """Return a list of daily percentage changes."""
+    daily_change = []
+    for tot in daily_totals:
+        if daily_totals[0] > 0:
+            daily_change\
+                .append(round(((tot * 100 / daily_totals[0]) - 100), 5))
+        else:
+            daily_change.append(0)
+    return daily_change
+
+
+def query_shares(request, user_id, symbol):
+    """Return shares for current user and stock symbol."""
+    current_stock_id = request.dbsession.query(Stocks)\
+        .filter(Stocks.symbol == symbol).first().id
+    shares = request.dbsession.query(Association).\
+        filter(and_(Association.stock_id == current_stock_id,
+               Association.user_id == user_id)).first().shares
+    return int(shares)
+
+
 def build_graph(request, elements, percentage=False):
     """Build and return the graph data from an API request."""
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
@@ -287,31 +309,27 @@ def build_graph(request, elements, percentage=False):
         entries = {}
         for key, value in resp.json().items():
             entries[key] = value
-        print('entries:', entries)
 
     # build export dict for template
         export = {}
         export['dates'] = format_dates(entries['Dates'])
         export['x_values'] = entries['Positions']
-
         daily_totals = [0 for j in range(len(export['x_values']))]
+
         stocks = {}
         current_user_id = request.dbsession.query(Users).filter(
             Users.username == request.authenticated_userid
         ).first().id
-        for series in entries['Elements']:
-            current_stock_id = request.dbsession.query(Stocks)\
-                .filter(Stocks.symbol == series['Symbol']).first().id
-            shares = request.dbsession.query(Association).\
-                filter(and_(Association.stock_id == current_stock_id,
-                       Association.user_id == current_user_id)).first().shares
 
+        for series in entries['Elements']:
+
+            shares = query_shares(request, current_user_id, series['Symbol'])
             y_vals = series['DataSeries']['close']['values']
             price = y_vals[-1]
 
             if not shares:
                 shares = 0
-            shares = int(shares)
+
             total_shares += (shares)
             total_value += (price) * (shares)
 
@@ -330,13 +348,7 @@ def build_graph(request, elements, percentage=False):
                 'value': price * shares,
             }
 
-        daily_change = []
-        for tot in daily_totals:
-            if daily_totals[0] > 0:
-                daily_change\
-                    .append(round(((tot * 100 / daily_totals[0]) - 100), 5))
-            else:
-                daily_change.append(0)
+        daily_change = prepare_daily_changes(daily_totals)
 
         if percentage:
             stocks['Total'] = {
