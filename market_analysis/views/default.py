@@ -105,6 +105,7 @@ def portfolio(request):
     The main user portfolio page, displays a list of
     their stocks and a graph.
     '''
+    #import pdb;pdb.set_trace()
     current_user_id = request.dbsession.query(Users).filter(
                 Users.username == request.authenticated_userid
             ).first().id
