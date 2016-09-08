@@ -111,6 +111,19 @@ def portfolio(request):
     query = request.dbsession.query(Users).\
         filter(Users.id == current_user_id).first()
     query = query.children
+
+    if request.method == 'POST':
+        updated_amount = request.POST['amount']
+        for item, val in request.POST.items():
+            if val == 'Update':
+                updated_stock = item
+        current_stock_id = request.dbsession.query(Stocks).filter(Stocks.symbol == updated_stock).first().id
+        request.dbsession.query(Association)\
+            .filter(and_(current_stock_id == Association.stock_id,
+                Association.user_id == current_user_id)).update({Association.shares: updated_amount})
+
+
+    
     list_of_stock_ids = []
     msg = "Go to Search to add stocks to watch or click on Symbol to see details."
     for row in query:
@@ -276,7 +289,6 @@ def build_graph(request, elements, percentage=False):
                 'currency': series['Currency'],
                 'max': series['DataSeries']['close']['max'],
                 'min': series['DataSeries']['close']['min'],
-
             }
 
         export['stocks'] = stocks
