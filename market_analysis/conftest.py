@@ -9,13 +9,13 @@ from .models import (
 )
 from .models.meta import Base
 import transaction
-
+from market_analysis.scripts.test_db import STOCKS_100
 # import datetime
-from .models.mymodel import Users
+from .models.mymodel import Users, Association, Stocks
 from passlib.apps import custom_app_context as pwd_context
 
 
-OS_USER = os.environ.get('USER', 'banksd')
+OS_USER = os.environ.get('USER', 'tatianaphillips')
 DB_SETTINGS = {'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'.format(OS_USER)}
 
 
@@ -23,6 +23,7 @@ DB_SETTINGS = {'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'.format(
 def sqlengine(request):
     config = testing.setUp(settings=DB_SETTINGS)
     config.include('.models')
+    config.testing_securitypolicy(userid='fake', permissive=True)
     settings = config.get_settings()
     engine = get_engine(settings)
     Base.metadata.create_all(engine)
@@ -58,11 +59,30 @@ def populated_db(sqlengine, request):
             username=USER_CREDENTIALS['username'],
             pass_hash=pwd_context.encrypt(USER_CREDENTIALS['password']))
         dbsession.add(user)
+        
         # import pdb; pdb.set_trace()
+        for line in STOCKS_100:
+            stock = Stocks(symbol=line[0], name=line[1], exchange='NASDAQ')
+            dbsession.add(stock)
+            
+        association_test = [
+                        (1, 1, 10),
+                        (1, 2, 10),
+                        (1, 3, 10),
+                        (1, 4, 13),
+                        (1, 5, 12),
+                        ]
+        for tup in association_test:
+            association = Association(user_id=tup[0], stock_id=tup[1], shares=tup[2])
+            dbsession.add(association)
 
-    def teardown():
-        with transaction.manager:
-            dbsession.query(Users).delete()
+
+        def teardown():
+            with transaction.manager:
+                dbsession.query(Association).delete()
+                dbsession.query(Users).delete()
+                dbsession.query(Stocks).delete()
+            
 
     request.addfinalizer(teardown)
 
