@@ -179,17 +179,14 @@ def admin(request):
         them to change and update user information, or remove user'''
     message = user_to_delete = ''
     if request.method == 'POST':
-        import pdb; pdb.set_trace()
         if request.POST['username'] and \
            (request.session['user_to_delete'] != ''):
             username = request.POST['username']
-            message = 'Are you sure you want to delete user {}?'.format(username)
+            message = 'Are you sure you want to delete user {}?'\
+                .format(username)
             request.session['user_to_delete'] = username
         else:
-            # request.POST['username'] == 'DELETE_ME_NOW!':
             message = 'Cool, that dick is gone!'
-
-
     try:
         query = request.dbsession.query(Users)
         users = query.all()
@@ -203,6 +200,10 @@ def admin(request):
 
 @view_config(route_name='home')
 def home(request):
+    """
+    Redirect to Portfolio or Login page based on
+    whether the user is logged in or not.
+    """
     if request.authenticated_userid:
         headers = remember(request, request.authenticated_userid)
         return HTTPFound(location=request.route_url('portfolio'),
@@ -213,6 +214,7 @@ def home(request):
 
 @view_config(route_name='login', renderer='templates/login.jinja2')
 def login(request):
+    """Login form. New User form can be reached from here."""
     if request.method == 'POST':
         username = request.params.get('username', '')
         password = request.params.get('password', '')
@@ -234,15 +236,18 @@ def login(request):
 
 @view_config(route_name='logout')
 def logout(request):
+    """Log out a user."""
     headers = forget(request)
     return HTTPFound(request.route_url('login'), headers=headers)
 
 @view_config(route_name='api_error', renderer='templates/api_error.jinja2')
 def api_error(request):
+    """Display a page with an error msg when can't connect to api."""
     return {}
 
 
 def format_dates(date_list):
+    """Truncate date format."""
     ret_list = []
     for date in date_list:
         date = date[5:10]
@@ -357,6 +362,7 @@ def build_graph(request, elements, percentage=False):
 
 @view_config(route_name='new_user', renderer='templates/new_user.jinja2')
 def new_user(request):
+    """New User form."""
     username = password = password_verify = first_name = ''
     last_name = phone_number = email = error = message = ''
 
@@ -414,6 +420,12 @@ def new_user(request):
     return {'error': error, 'username': username, 'first_name': first_name,
             'last_name': last_name, 'phone_number': phone_number,
             'email': email, 'message': message}
+
+
+@view_config(route_name='about', renderer='templates/about.jinja2')
+def about(request):
+    """Render About page."""
+    return {}
 
 
 db_err_msg = """\
