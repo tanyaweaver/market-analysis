@@ -279,6 +279,7 @@ def build_graph(request, elements, percentage=False):
         for series in entries['Elements']:
             y_vals = series['DataSeries']['close']['values']
 
+            price = y_vals[-1]
             if percentage:
                 y_vals = convert_to_percentage(y_vals)
 
@@ -287,6 +288,7 @@ def build_graph(request, elements, percentage=False):
 
             stocks[series['Symbol']] = {
                 'y_values': y_vals,
+                'price': price,
                 'currency': series['Currency'],
                 'max': series['DataSeries']['close']['max'],
                 'min': series['DataSeries']['close']['min'],
