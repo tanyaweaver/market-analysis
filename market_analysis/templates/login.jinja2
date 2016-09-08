@@ -7,12 +7,15 @@
           <h1>stoc<span class="span1">K</span><span class="span2">watch</span></h1>
       </div>
 
+  {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+  {% endif %}
 
 
     <form class="form" action="" method="POST">
       <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
 
-        <div class="row">
+        <div  id="row-login" class="row">
        
             <div class="input-group" id="input">
               <span class="input-group-addon" id="basic-addon1">Username</span>

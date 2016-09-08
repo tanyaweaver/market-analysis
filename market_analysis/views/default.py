@@ -3,6 +3,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 from sqlalchemy.exc import DBAPIError
+from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy import and_, or_
 try:
     from urllib.parse import urlencode
@@ -80,7 +81,7 @@ def delete_stock_from_portfolio(request):
             request.dbsession.delete(query_del)
             msg = request.matchdict['sym'] + ' was removed from'\
                 ' your portfolio.'
-        except AttributeError:
+        except (AttributeError, UnmappedInstanceError):
             msg = 'Failed: tried to remove a stock that is not in the'\
                 ' portfolio.'
     else:
