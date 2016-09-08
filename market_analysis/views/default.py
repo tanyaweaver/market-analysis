@@ -266,12 +266,10 @@ def build_graph(request, elements, percentage=False):
         entries = {}
         for key, value in resp.json().items():
             entries[key] = value
+        print('entries:', entries)
 
         # build export dict for template
         export = {}
-
-        print(entries)
-
         export['dates'] = format_dates(entries['Dates'])
         export['x_values'] = entries['Positions']
 
@@ -293,6 +291,7 @@ def build_graph(request, elements, percentage=False):
 
             for i in range(len(y_vals)):
                 daily_totals[i] += (y_vals[i] * shares)
+                print(daily_totals)
 
             if percentage:
                 y_vals = convert_to_percentage(y_vals)
@@ -307,10 +306,11 @@ def build_graph(request, elements, percentage=False):
             }
 
         daily_change = []
-        if daily_totals[0] == 0 and not percentage:
-            daily_totals[0] = 1
         for tot in daily_totals:
-            daily_change.append(round(((tot / daily_totals[0] - 1) * 100), 5))
+            if daily_totals[0] > 0:
+                daily_change.append(round(((tot * 100 / daily_totals[0]) - 100), 5))
+            else:
+                daily_change.append(0)
 
         if percentage:
             stocks['Total'] = {
@@ -324,7 +324,7 @@ def build_graph(request, elements, percentage=False):
         export['total_shares'] = total_shares
         export['total_value'] = round((total_value), 2)
 
-        print(export)
+        print('export:', export)
         return {'entry': export}
 
     else:
