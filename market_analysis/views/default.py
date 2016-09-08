@@ -258,7 +258,7 @@ def convert_to_percentage(y_vals):
 
 
 def build_graph(request, elements, percentage=False):
-    """Build the graph from an API request."""
+    """Build and return the graph data from an API request."""
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
     req_obj = {
         "parameters":
@@ -270,12 +270,12 @@ def build_graph(request, elements, percentage=False):
         }
     }
 
-    total_shares = 0
-    total_value = 0
-
     resp = requests.get(url, params=urlencode(req_obj))
 
     if resp.status_code == 200:
+
+        total_shares = 0
+        total_value = 0
         entries = {}
         for key, value in resp.json().items():
             entries[key] = value
@@ -288,7 +288,6 @@ def build_graph(request, elements, percentage=False):
 
         daily_totals = [0 for j in range(len(export['x_values']))]
 
-        stocks = {}
         current_user_id = request.dbsession.query(Users).filter(
             Users.username == request.authenticated_userid
         ).first().id
@@ -310,11 +309,11 @@ def build_graph(request, elements, percentage=False):
 
             for i in range(len(y_vals)):
                 daily_totals[i] += (y_vals[i] * shares)
-                print(daily_totals)
 
             if percentage:
                 y_vals = convert_to_percentage(y_vals)
 
+            stocks = {}
             stocks[series['Symbol']] = {
                 'y_values': y_vals,
                 'price': price,
