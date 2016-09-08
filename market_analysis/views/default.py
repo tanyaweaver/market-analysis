@@ -32,7 +32,7 @@ def search_stocks(request):
                         Stocks.symbol.startswith(search2)))
         except DBAPIError:  # pragma: no cover
             return Response(db_err_msg, content_type='text/plain', status=500)
-        
+
         for row in search_query:
             search_results.append(row)
         if len(search_results) == 0:
@@ -176,16 +176,26 @@ def single_stock_details(request):
 def admin(request):
     '''A page to display a users information to the site adimn and allow
         them to change and update user information, or remove user'''
-    message = ''
+    message = user_to_delete = ''
     if request.method == 'POST':
-        username = request.POST['username']
-        message = 'The delete button was pressed for user {}'.format(username)
+        if request.POST['username'] != 'DELETE_ME_NOW':
+            username = request.POST['username']
+            message = 'Are you sure you want to delete user {}?'.format(username)
+            user_to_delete = username
+        else:
+            # request.POST['username'] == 'DELETE_ME_NOW!':
+            message = 'Cool, that dick is gone!'
+
+
     try:
         query = request.dbsession.query(Users)
         users = query.all()
     except DBAPIError:
         return Response(db_err_msg, content_type='text/plain', status=500)
-    return {'users': users, 'message': message}
+
+    return {'users': users,
+            'message': message,
+            'user_to_delete': user_to_delete}
 
 
 @view_config(route_name='home')
