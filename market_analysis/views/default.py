@@ -314,19 +314,19 @@ def build_graph(request, elements, percentage=False):
 
         daily_change = []
         for tot in daily_totals:
-            daily_change.append((tot / daily_totals[0] - 1) * 100)
+            daily_change.append(round(((tot / daily_totals[0] - 1) * 100), 5))
 
         if percentage:
             stocks['Total'] = {
                 'y_values': daily_change,
                 'price': total_value,
                 'shares': total_shares,
-                'value': total_value * total_shares,
+                'value': round(total_value, 2),
             }
 
         export['stocks'] = stocks
         export['total_shares'] = total_shares
-        export['total_value'] = total_value
+        export['total_value'] = round((total_value), 2)
 
         print(export)
         return {'entry': export}
