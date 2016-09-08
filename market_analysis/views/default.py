@@ -292,6 +292,8 @@ def build_graph(request, elements, percentage=False):
             price = y_vals[-1]
             current_stock_id = request.dbsession.query(Stocks).filter(Stocks.symbol == series['Symbol']).first().id
             shares = request.dbsession.query(Association).filter(Association.stock_id == current_stock_id).first().shares
+            if not shares:
+                shares = 0
             total_shares += shares
             total_value += price * shares
 
