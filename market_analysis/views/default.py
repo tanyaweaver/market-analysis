@@ -223,6 +223,10 @@ def logout(request):
     headers = forget(request)
     return HTTPFound(request.route_url('login'), headers=headers)
 
+@view_config(route_name='api_error', renderer='templates/api_error.jinja2')
+def api_error(request):
+    return {}
+
 
 def format_dates(date_list):
     ret_list = []
@@ -243,9 +247,7 @@ def convert_to_percentage(y_vals):
 
 
 def build_graph(request, elements, percentage=False):
-# def build_graph(request, elements, msg):
-    """Builds the graph from an API request."""
-
+    """Build the graph from an API request."""
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
     req_obj = {
         "parameters":
@@ -268,7 +270,7 @@ def build_graph(request, elements, percentage=False):
             entries[key] = value
         print('entries:', entries)
 
-        # build export dict for template
+    # build export dict for template
         export = {}
         export['dates'] = format_dates(entries['Dates'])
         export['x_values'] = entries['Positions']
@@ -337,7 +339,8 @@ def build_graph(request, elements, percentage=False):
     else:
         print('Error connecting to API')
         print(resp.status_code)
-        return {'entry': {}}
+
+        return HTTPFound(request.route_url('api_error'))
 
 
 @view_config(route_name='new_user', renderer='templates/new_user.jinja2')
