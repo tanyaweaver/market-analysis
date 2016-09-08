@@ -178,17 +178,18 @@ def admin(request):
         them to change and update user information, or remove user'''
     message = user_to_delete = ''
     if request.method == 'POST':
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         if request.POST['username'] and \
-           (request.session['user_to_delete'] != ''):
+           (request.session['user_to_delete'] == ''):
             username = request.POST['username']
             message = 'Are you sure you want to delete user {}?'.format(username)
             request.session['user_to_delete'] = username
         else:
             # request.POST['username'] == 'DELETE_ME_NOW!':
             message = 'Cool, that dick is gone!'
-
-
+            # TODO: add the deletion here
+            request.session['user_to_delete'] = ''
+            
     try:
         query = request.dbsession.query(Users)
         users = query.all()
