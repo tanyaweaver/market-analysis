@@ -7,13 +7,14 @@
 
   <div class="jumbotron">
 
-          <form action="{{ request.route_url('search') }}" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
-            <input class="search_input" type="text" name="search"/>
-            <input class="btn btn-default" type="submit" value="Search"/>
+          <form class="form" action="{{ request.route_url('search') }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
+              <input class="search-input" type="text" name="search"/>
+              <input id="colored-button" class="btn btn-default" type="submit" value="Search"/>
           </form>
 
- 
+  </div>
+
     <div class=list_of_articles>
 
            {% for stock in stocks %}
@@ -27,6 +28,6 @@
               </article>
             {% endfor %}
 
-          </div>
+    </div>
 
 {% endblock %}

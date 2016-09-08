@@ -5,7 +5,7 @@
 
       <table class="table table-inverse">
         <thead>
-          <tr>
+          <tr class="bold">
             <th>Symbol</th>
             <th>%Change in Value</th>
             <th>Current Price</th>
@@ -37,7 +37,7 @@
                 <td>
                         <form action="/delete/{{stock}}" method="POST">
                           <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
-                          <input class="btn btn-default" type="Submit" name="delete_button" value="Delete"/>
+                          <input id="colored-button" class="btn btn-default" type="Submit" name="delete_button" value="Delete"/>
                         </form>
                 </td>
               </tr>
@@ -60,7 +60,7 @@
               <td></td>
             </tr>            
           </table>
-          <span class="Summary">Total Value of Portfolio: {{ entry.total_value }} USD</span>
+          <span class="bold">Total Value of Portfolio: {{ entry.total_value }} USD</span>
   
 
           <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
