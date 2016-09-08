@@ -75,6 +75,7 @@
 
 
               function drawCrosshairs() {
+                var t = 0;
                 var data = new google.visualization.DataTable();
                 data.addColumn('string', 'X');
               {% for stock in entry.stocks %}
@@ -85,12 +86,23 @@
                 rowData.push(['{{ date }}']);
               {% endfor %}
 
+              var s = {};
+              for (i = 0; i < data['Kf'].length; i++) {
+                if (data['Kf'][i].label == 'Total') {
+                  t = i - 1;
+                  // t = t.toString();
+                  s[t] = { lineDashStyle: [14, 2, 7, 2] };
+                }
+              }
+
               for (i = 0; i < rowData.length; i++) {
                   {% for stock, val in entry.stocks.items() %}
                       rowData[i].push({{val.y_values}}[i]);
                   {% endfor %}
               };
+
               data.addRows(rowData)
+              
               var options = {
                 hAxis: {
                   title: 'Time'
@@ -105,7 +117,8 @@
                 crosshair: {
                   color: '#000',
                   trigger: 'selection'
-                }
+                },
+                series: s
               };
 
 
