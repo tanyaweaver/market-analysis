@@ -50,7 +50,7 @@
               {% else %}
               <td>---</td>
               {% endif %}
-              <td>{{ entry.stocks['Total'].price }}</td>
+              <td>$ {{ entry.stocks['Total'].price|round(2) }}</td>
               <td>{{ entry.stocks['Total'].shares }}</td>
               {% if entry.stocks['Total'].shares > 0 %}
               <td>{{ (entry.stocks['Total'].value * 100 / entry.total_value)|round(3) }}</td>
