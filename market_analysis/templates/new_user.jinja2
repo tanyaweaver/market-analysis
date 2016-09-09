@@ -51,8 +51,8 @@
             <input type="text" class="form-control" placeholder="Last Name" aria-describedby="basic-addon1" name="last_name" value="{{ last_name }}">
           </div>
           <div class="input-group" id="input">
-            <span class="input-group-addon" id="basic-addon1">Phone #</span>
-            <input type="tel" class="form-control" placeholder="Phone Number" aria-describedby="basic-addon1" name="phone_number" value="{{ phone_number }}">
+            <span class="input-group-addon" id="basic-addon1">Phone # xxx-xxx-xxxx</span>
+            <input type="tel" pattern="^\d{3}-\d{3}-\d{4}$" class="form-control" placeholder="Phone Number" aria-describedby="basic-addon1" name="phone_number" value="{{ phone_number }}">
           </div>
         </div>
     </div>
