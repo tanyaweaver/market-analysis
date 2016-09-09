@@ -90,19 +90,6 @@ def delete_stock_from_portfolio(request):
     return {'msg': msg}
 
 
-@view_config(route_name='private',
-             renderer='string',
-             permission='secret')
-def private(request):
-    return "I'm a private view."
-
-
-@view_config(route_name='public', renderer='string',
-             permission='view')
-def pubic(request):
-    return "I'm a public page"
-
-
 @view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2",
              permission='secret')
 def portfolio(request):
@@ -187,8 +174,10 @@ def single_stock_details(request):
 @view_config(route_name='admin', renderer="../templates/admin.jinja2",
              permission='admin')
 def admin(request):
-    '''A page to display a users information to the site adimn and allow
-        them to change and update user information, or remove user'''
+    '''
+    A page to display a users information to the site adimn and allow
+    them to change and update user information, or remove user.
+    '''
     message = user_to_delete = ''
     if request.method == 'POST':
         if (request.POST['username'] != 'DELETE_ME_NOW') and \
@@ -198,7 +187,6 @@ def admin(request):
                       .format(username)
             request.session['user_to_delete'] = username
         elif request.POST['username'] == 'DELETE_ME_NOW':
-            # TODO: add a check so the admin user cannot be deleted
             username = request.session['user_to_delete']
             query = request.dbsession.query(Users)\
                 .filter(Users.username == username).first()
@@ -210,7 +198,7 @@ def admin(request):
     try:
         query = request.dbsession.query(Users)
         users = query.all()
-    except DBAPIError:
+    except DBAPIError:  # pragma: no cover
         return Response(db_err_msg, content_type='text/plain', status=500)
 
     return {'users': users,
@@ -298,9 +286,12 @@ def query_shares(request, user_id, symbol):
     return int(shares)
 
 
-def build_stock_entry(y_values, price, shares, value, max_num=None, min_num=None):
+def build_stock_entry(
+        y_values, price, shares, value, max_num=None, min_num=None
+        ):
     """Build a stock entry to be returned to build graph."""
-    return {'y_values': y_values, 'price': price, 'shares': shares, 'value': value, 'max': max_num, 'min': min_num}
+    return {'y_values': y_values, 'price': price, 'shares': shares,
+            'value': value, 'max': max_num, 'min': min_num}
 
 
 def build_graph(request, elements, percentage=False):
@@ -351,11 +342,18 @@ def build_graph(request, elements, percentage=False):
             if percentage:
                 y_vals = prepare_daily_changes(y_vals)
 
-            stocks[series['Symbol']] = build_stock_entry(y_vals, price, shares, (price * shares), series['DataSeries']['close']['max'], series['DataSeries']['close']['min'])
+            stocks[series['Symbol']] = build_stock_entry(
+                                    y_vals, price, shares, (price * shares),
+                                    series['DataSeries']['close']['max'],
+                                    series['DataSeries']['close']['min']
+                                    )
 
         if percentage:
             daily_change = prepare_daily_changes(daily_totals)
-            stocks['Total'] = build_stock_entry(daily_change, round(total_value, 2), total_shares, round(total_value, 2))
+            stocks['Total'] = build_stock_entry(
+                                    daily_change, round(total_value, 2),
+                                    total_shares, round(total_value, 2)
+                                    )
 
         export['stocks'] = stocks
         export['total_shares'] = total_shares
@@ -385,7 +383,7 @@ def new_user(request):
         try:
             query = request.dbsession.query(Users)
             result = query.filter_by(username=username).first()
-        except DBAPIError:
+        except DBAPIError:  # pragma: no cover
             return Response(db_err_msg, content_type='text/plain', status=500)
 
         if result:
@@ -420,7 +418,7 @@ def new_user(request):
                                      headers=headers)
                 else:
                     error = 'Passwords do not match or password'\
-                            'is less then 6 characters'
+                            ' is less than 6 characters'
             else:
                 error = 'Missing Required Fields'
 
