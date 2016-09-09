@@ -266,6 +266,33 @@ def test_update_shares(new_session, populated_db3):
                     Association.stock_id == 1)).first().shares
     assert query_after == 9
 
+def test_format_dates():
+    from .views.default import format_dates
+    date_list = ['2016-08-26T00:00:00', '2016-08-29T00:00:00', '2016-08-30T00:00:00', '2016-08-31T00:00:00', '2016-09-01T00:00:00']
+    new_list = format_dates(date_list)
+    assert new_list == ['08-26', '08-29', '08-30', '08-31', '09-01']
+
+
+def test_prepare_daily_changes():
+    from .views.default import prepare_daily_changes
+    initial = [10, 100, 500]
+    result = prepare_daily_changes(initial)
+    assert result == [0.0, 900.0, 4900.0]
+
+
+def test_query_shares(new_session, populated_db3):
+    from .views.default import query_shares
+    http_request = dummy_http_request(new_session, 'POST')
+    result = query_shares(http_request, 1, 'ATVI')
+    assert result == 10
+
+
+def test_build_stock_entry():
+    from .views.default import build_stock_entry
+    result = build_stock_entry([1, 2, 3], 30, 5, 150, 1, 0)
+    assert result == {'y_values': [1, 2, 3], 'price': 30, 'shares': 5, 'value': 150, 'max': 1, 'min': 0}
+
+
 # can't connect to api
 # def test_details_error_sym(app, new_session):
 #     from .views.default import single_stock_details

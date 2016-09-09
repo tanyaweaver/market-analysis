@@ -248,6 +248,7 @@ def logout(request):
     headers = forget(request)
     return HTTPFound(request.route_url('login'), headers=headers)
 
+
 @view_config(route_name='api_error', renderer='templates/api_error.jinja2')
 def api_error(request):
     """Display a page with an error msg when can't connect to api."""
@@ -260,16 +261,6 @@ def format_dates(date_list):
     for date in date_list:
         date = date[5:10]
         ret_list.append(date)
-    return ret_list
-
-
-def convert_to_percentage(y_vals):
-    """Convert a list of y_values to be percentage based first val."""
-    initial = y_vals[0]
-    ret_list = []
-    for val in y_vals:
-        val = round((val / initial - 1) * 100, 5)
-        ret_list.append(val)
     return ret_list
 
 
@@ -295,10 +286,15 @@ def query_shares(request, user_id, symbol):
     return int(shares)
 
 
+def build_stock_entry(y_values, price, shares, value, max_num=None, min_num=None):
+    """Build a stock entry to be returned to build graph."""
+    return {'y_values': y_values, 'price': price, 'shares': shares, 'value': value, 'max': max_num, 'min': min_num}
+
+
 def build_graph(request, elements, percentage=False):
-    """Build and return the graph data from an API request."""
+    """Build and return the graph data from an API request for rendering."""
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
-    req_obj = {
+    req_obj = {     # parameters for API request
         "parameters":
         {
             'Normalized': 'false',
@@ -307,24 +303,23 @@ def build_graph(request, elements, percentage=False):
             'Elements': elements
         }
     }
-    total_shares = 0
-    total_value = 0
-
     resp = requests.get(url, params=urlencode(req_obj))
 
     if resp.status_code == 200:
+        total_shares = 0
+        total_value = 0
+        entries = {}    # data from API
+        stocks = {}     # data entries for each stock
+        export = {}     # container of re-packaged data to be rendered
 
-        entries = {}
         for key, value in resp.json().items():
             entries[key] = value
 
     # build export dict for template
-        export = {}
         export['dates'] = format_dates(entries['Dates'])
         export['x_values'] = entries['Positions']
         daily_totals = [0 for j in range(len(export['x_values']))]
 
-        stocks = {}
         current_user_id = request.dbsession.query(Users).filter(
             Users.username == request.authenticated_userid
         ).first().id
@@ -345,26 +340,13 @@ def build_graph(request, elements, percentage=False):
                 daily_totals[i] += (y_vals[i] * shares)
 
             if percentage:
-                y_vals = convert_to_percentage(y_vals)
+                y_vals = prepare_daily_changes(y_vals)
 
-            stocks[series['Symbol']] = {
-                'y_values': y_vals,
-                'price': price,
-                'max': series['DataSeries']['close']['max'],
-                'min': series['DataSeries']['close']['min'],
-                'shares': shares,
-                'value': price * shares,
-            }
-
-        daily_change = prepare_daily_changes(daily_totals)
+            stocks[series['Symbol']] = build_stock_entry(y_vals, price, shares, (price * shares), series['DataSeries']['close']['max'], series['DataSeries']['close']['min'])
 
         if percentage:
-            stocks['Total'] = {
-                'y_values': daily_change,
-                'price': round(total_value, 2),
-                'shares': total_shares,
-                'value': round(total_value, 2),
-            }
+            daily_change = prepare_daily_changes(daily_totals)
+            stocks['Total'] = build_stock_entry(daily_change, round(total_value, 2), total_shares, round(total_value, 2))
 
         export['stocks'] = stocks
         export['total_shares'] = total_shares
@@ -378,6 +360,8 @@ def build_graph(request, elements, percentage=False):
         print(resp.status_code)
 
         return HTTPFound(request.route_url('api_error'))
+
+
 
 
 @view_config(route_name='new_user', renderer='templates/new_user.jinja2')

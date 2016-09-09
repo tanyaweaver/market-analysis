@@ -13,8 +13,11 @@ from .models.mymodel import Users, Association, Stocks
 from passlib.apps import custom_app_context as pwd_context
 
 OS_USER = os.environ.get('USER')
-DB_SETTINGS = {'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'
-               .format(OS_USER)}
+DB_SETTINGS = {
+                'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'
+                #'sqlalchemy.url': 'postgres:///testing'
+                .format(OS_USER)
+                }
 
 USER_CREDENTIALS = {'username': 'fake', 'password': 'fake'}
 USER_PASS_HASH = pwd_context.encrypt(USER_CREDENTIALS['password'])
