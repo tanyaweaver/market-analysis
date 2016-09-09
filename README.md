@@ -14,4 +14,4 @@
 
 Keywords:  Python, Pyramid, Postgresql, Google Charts, Jinja2, JavaScript
 
-This project is the first team project for Code Fellows 401 Python course.
+This project is the first team project for Code Fellows 401 Python course.  This app is for educational and entertainment purposes only.

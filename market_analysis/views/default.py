@@ -142,6 +142,26 @@ def portfolio(request):
         return build_graph(request, elements, True)
 
 
+def package_data(info, entries, msg):
+    """Package data for single_stock_details."""
+    try:
+        info['info'] = entries
+        info['msg'] = msg
+    except TypeError:
+        info = {}
+        info['info'] = entries
+        msg = 'Trouble connecting to API.'
+        info['msg'] = msg
+    return info
+
+
+def check_bad_msg(entries):
+    """Return True if bad request."""
+    if 'Message' in entries.keys():
+        return True
+    return False
+
+
 @view_config(route_name='details', renderer="../templates/details.jinja2",
                         permission="secret")
 def single_stock_details(request):
@@ -154,22 +174,13 @@ def single_stock_details(request):
                         'Api/v2/Quote/json?symbol=' + sym)
     if resp.status_code == 200:
         entries = {key: value for key, value in resp.json().items()}
-        if 'Message' in entries.keys():
+        if check_bad_msg(entries):
             msg = 'Bad request.'
-            entries = {}
         elements.append({'Symbol': str(sym), 'Type': 'price', 'Params': ['c']})
     else:
-        entries = {}
         msg = 'Could not fulfill the request.'
     temp = build_graph(request, elements)
-    try:
-        temp['info'] = entries
-        temp['msg'] = msg
-    except TypeError:
-        temp = {}
-        temp['info'] = entries
-        msg = 'Trouble connecting to API.'
-        temp['msg'] = msg
+    temp = package_data(temp, entries, msg)
     return temp
 
 
@@ -309,12 +320,9 @@ def build_graph(request, elements, percentage=False):
     if resp.status_code == 200:
         total_shares = 0
         total_value = 0
-        entries = {}    # data from API
+        entries = {key: value for key, value in resp.json().items()}    # data from API
         stocks = {}     # data entries for each stock
         export = {}     # container of re-packaged data to be rendered
-
-        for key, value in resp.json().items():
-            entries[key] = value
 
     # build export dict for template
         export['dates'] = format_dates(entries['Dates'])
@@ -334,8 +342,8 @@ def build_graph(request, elements, percentage=False):
             if not shares:
                 shares = 0
 
-            total_shares += (shares)
-            total_value += (price) * (shares)
+            total_shares += shares
+            total_value += price * shares
 
             for i in range(len(y_vals)):
                 daily_totals[i] += (y_vals[i] * shares)
@@ -353,16 +361,10 @@ def build_graph(request, elements, percentage=False):
         export['total_shares'] = total_shares
         export['total_value'] = round((total_value), 2)
 
-        print('export:', export)
         return {'entry': export}
 
     else:
-        print('Error connecting to API')
-        print(resp.status_code)
-
         return HTTPFound(request.route_url('api_error'))
-
-
 
 
 @view_config(route_name='new_user', renderer='templates/new_user.jinja2')
