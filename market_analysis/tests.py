@@ -1,9 +1,9 @@
 from pyramid import testing
-from .models import (
-    get_engine,
-    get_session_factory,
-    get_tm_session
-    )
+# from .models import (
+#     get_engine,
+#     get_session_factory,
+#     get_tm_session
+#     )
 from .models.mymodel import (
     Users,
     Stocks,
@@ -11,7 +11,6 @@ from .models.mymodel import (
     )
 import datetime
 from sqlalchemy import and_
-
 DATE = datetime.datetime.now()
 
 
@@ -23,8 +22,65 @@ def dummy_http_request(new_session, method='GET'):
     return request
 
 
+def test_delete_stock_msg(admin_app, populated_db3):
+    '''
+    Test that a confirmation msg is in response after
+    delition of a stock from portfolio.
+    '''
+    app, token = admin_app
+    auth_data = {
+                 "delete_button": 'Delete',
+                 'csrf_token': token}
+
+    response = app.post('/delete/ATVI', auth_data, status='2*')
+    assert 'ATVI was removed from your portfolio.' in response.text
+
+
+def test_search_stock_err_msg(admin_app, populated_db3):
+    '''
+    Test that a confirmation msg renders to the page after
+    delition of a stock from portfolio.
+    '''
+    app, token = admin_app
+    auth_data = {
+                 'search': 'ladjhfglakgs',
+                 'csrf_token': token}
+
+    response = app.post('/search', auth_data, status='2*')
+    assert 'No results found, try again.' in response.text
+
+
+def test_add_stock_success_msg(admin_app, populated_db3):
+    '''
+    Test that a confirmation msg is in response after
+    addition of a stock to portfolio.
+    '''
+    app, token = admin_app
+    auth_data = {
+                 'csrf_token': token}
+
+    response = app.post('/add/Amazon, Inc./6', auth_data, status='2*')
+    assert 'Amazon, Inc. was added to your portfolio.' in response.text
+
+
+def test_add_stock_err_msg(admin_app, populated_db3):
+    '''
+    Test that a confirmation msg is in response after
+    addition of a stock to portfolio.
+    '''
+    app, token = admin_app
+    auth_data = {
+                 'csrf_token': token}
+
+    response = app.post(
+                                        '/add/Activision Blizzard, Inc/1',
+                                        auth_data, status='2*')
+    assert 'Activision Blizzard, Inc is already in your'\
+        ' portfolio' in response.text
+
+
 def test_user_model_gets_added(new_session, populated_db3):
-    """Test that a new model gets added."""
+    """Test that a new model for Users gets added."""
     assert len(new_session.query(Users).all()) == 1
     model = Users(
         username='Jo',
@@ -46,7 +102,7 @@ def test_user_model_gets_added(new_session, populated_db3):
 
 
 def test_stock_model_gets_added(new_session, populated_db3):
-    """Test that a new model gets added."""
+    """Test that a new model for Stocks gets added."""
     assert len(new_session.query(Stocks).all()) == 104
     model = Stocks(symbol='XYZ', name='zipper company', exchange='DOW')
     new_session.add(model)
@@ -55,7 +111,7 @@ def test_stock_model_gets_added(new_session, populated_db3):
 
 
 def test_association_model_gets_added(new_session, populated_db3):
-    """Test that a new model gets added."""
+    """Test that a new model for Association gets added."""
     assert len(new_session.query(Association).all()) == 5
     model = Association(user_id=1, stock_id=50, shares=20)
     new_session.add(model)
@@ -64,8 +120,10 @@ def test_association_model_gets_added(new_session, populated_db3):
 
 
 def test_portfolio_view_and_API_graph_data(new_session, populated_db3):
-    """Test main portfolio page that entries is retrieved, and API
-    works and graphs data is returned."""
+    """
+    Test main portfolio page that entries is retrieved, and API
+    works and graphs data are returned.
+    """
     from .views.default import portfolio
     http_request = dummy_http_request(new_session)
     result = portfolio(http_request)
@@ -266,9 +324,16 @@ def test_update_shares(new_session, populated_db3):
                     Association.stock_id == 1)).first().shares
     assert query_after == 9
 
+
 def test_format_dates():
     from .views.default import format_dates
-    date_list = ['2016-08-26T00:00:00', '2016-08-29T00:00:00', '2016-08-30T00:00:00', '2016-08-31T00:00:00', '2016-09-01T00:00:00']
+    date_list = [
+                        '2016-08-26T00:00:00',
+                        '2016-08-29T00:00:00',
+                        '2016-08-30T00:00:00',
+                        '2016-08-31T00:00:00',
+                        '2016-09-01T00:00:00'
+                    ]
     new_list = format_dates(date_list)
     assert new_list == ['08-26', '08-29', '08-30', '08-31', '09-01']
 
@@ -290,23 +355,5 @@ def test_query_shares(new_session, populated_db3):
 def test_build_stock_entry():
     from .views.default import build_stock_entry
     result = build_stock_entry([1, 2, 3], 30, 5, 150, 1, 0)
-    assert result == {'y_values': [1, 2, 3], 'price': 30, 'shares': 5, 'value': 150, 'max': 1, 'min': 0}
-
-
-# can't connect to api
-# def test_details_error_sym(app, new_session):
-#     from .views.default import single_stock_details
-#     http_request = dummy_http_request(new_session)
-#     http_request.matchdict['sym'] = 'CSCODSR'
-#     result = single_stock_details(http_request)
-#     assert result == {'info': {}, 'msg': 'Bad request.'}
-
-
-# May return to this later
-# def test_details_error_resp_status(new_session):
-#     from .views.default import single_stock_details
-#     http_request = dummy_http_request(new_session)
-#     http_request.matchdict['sym'] = 'CSCO'
-#     result = single_stock_details(http_request)
-#     result.status_code = 404
-#     assert result == {'entry': {}, 'msg': 'Could not fulfill the request.'}
+    assert result == {'y_values': [1, 2, 3], 'price': 30, 'shares': 5,
+                      'value': 150, 'max': 1, 'min': 0}

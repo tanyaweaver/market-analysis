@@ -29,7 +29,7 @@ ADMIN_PASS_HASH = pwd_context.encrypt(ADMIN_CREDENTIALS['password'])
 def sqlengine(request):
     config = testing.setUp(settings=DB_SETTINGS)
     config.include('.models')
-    config.testing_securitypolicy(userid='fake', permissive=True)
+    config.testing_securitypolicy(userid='admin', permissive=True)
     settings = config.get_settings()
     engine = get_engine(settings)
     Base.metadata.create_all(engine)
@@ -79,8 +79,8 @@ def populated_db3(sqlengine, request):
 
     with transaction.manager:
         user = Users(
-            username='fake',
-            pass_hash='fake-password')
+            username=ADMIN_CREDENTIALS['username'],
+            pass_hash=ADMIN_PASS_HASH,)
         dbsession.add(user)
 
         for line in STOCKS_100:
@@ -161,7 +161,6 @@ def admin_app(app_and_csrf_token, populated_db_admin):
 @pytest.fixture(scope='function')
 def app_and_csrf_token(app):
     response = app.get('/login')
-    # import pdb; pdb.set_trace()
     input_ = response.html.find('input', attrs={'name': 'csrf_token'})
     token = input_.attrs['value']
     return app, token

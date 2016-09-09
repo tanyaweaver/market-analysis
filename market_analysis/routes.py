@@ -11,6 +11,3 @@ def includeme(config):
     config.add_route('portfolio', '/portfolio')
     config.add_route('details', '/details/{sym}')
     config.add_route('api_error', '/api_error')
-    config.add_route('private', '/private')
-    config.add_route('public', '/public')
-    
