@@ -187,12 +187,48 @@ def test_new_user_post_valid(app_and_csrf_token, populated_db):
     assert response.status_code == 302
 
 
+def test_admin_delete_user_returns_message(admin_app, populated_db):
+    '''Checks admin view DELETE button POST returns to admin with
+       conformation method'''
+    # import pdb; pdb.set_trace()
+    app, token = admin_app
+    auth_data = {'username': 'fake',
+                 'csrf_token': token}
+    response = app.post('/admin', auth_data, status='2*')
+    assert b'Are you sure you want to delete user fake?' in response.body
 
 
+def test_admin_delete_user_returns_message(admin_app, populated_db):
+    '''Checks admin view CANCEL button POST returns to admin without
+       conformation method'''
+    # import pdb; pdb.set_trace()
+    app, token = admin_app
+    auth_data = {'username': 'CANCEL',
+                 'csrf_token': token}
+    response = app.post('/admin', auth_data, status='2*')
+    assert b'Are you sure you want to delete user?' not in response.body
 
 
+# def test_admin_delete_user_adds_session_element(admin_app, populated_db):
+#     '''Checks admin view DELETE button sets a session verialbe'''
+#     # import pdb; pdb.set_trace()
+#     app, token = admin_app
+#     auth_data = {'username': 'fake',
+#                  'csrf_token': token}
+#     response = app.post('/admin', auth_data, status='2*')
+#     import pdb; pdb.set_trace()
+#     assert response.session['user_to_delete'] == auth_data['username']
 
 
+# def test_admin_delete_user_returns_message(admin_app, populated_db):
+#     '''Checks admin view DELETE conformation DELETE button POST
+#        removes the user'''
+#     # import pdb; pdb.set_trace()
+#     app, token = admin_app
+#     auth_data = {'username': 'DELETE_ME_NOW',
+#                  'csrf_token': token}
+#     response = app.post('/admin', auth_data, status='2*')
+#     assert b'fake' not in response.body
 
 
 
