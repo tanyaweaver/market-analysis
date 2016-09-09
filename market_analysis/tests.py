@@ -11,6 +11,7 @@ from .models.mymodel import (
     )
 import datetime
 from sqlalchemy import and_
+import pytest
 
 DATE = datetime.datetime.now()
 
@@ -260,6 +261,19 @@ def test_details_ok(new_session, populated_db3):
     http_request.matchdict['sym'] = 'ATVI'
     result = single_stock_details(http_request)
     assert result['info']['Symbol'] == 'ATVI'
+
+
+def test_package_data_None(new_session, populated_db3):
+    """Test result from typeerror in package_data."""
+    from .views.default import package_data
+    result = package_data(None, 'asdf', 'adsf')
+    assert result['msg'] == 'Trouble connecting to API.'
+
+
+def test_check_bad_msg():
+    """Test returns True if bad request."""
+    from .views.default import check_bad_msg
+    assert check_bad_msg({'Message': ''}) is True
 
 
 def test_update_shares(new_session, populated_db3):

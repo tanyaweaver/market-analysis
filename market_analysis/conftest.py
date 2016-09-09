@@ -14,8 +14,8 @@ from passlib.apps import custom_app_context as pwd_context
 
 OS_USER = os.environ.get('USER')
 DB_SETTINGS = {
-                'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'
-                #'sqlalchemy.url': 'postgres:///testing'
+                #'sqlalchemy.url': 'postgres://{}:@localhost:5432/testing'
+                'sqlalchemy.url': 'postgres:///testing'
                 .format(OS_USER)
                 }
 
