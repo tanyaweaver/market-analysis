@@ -320,12 +320,9 @@ def build_graph(request, elements, percentage=False):
     if resp.status_code == 200:
         total_shares = 0
         total_value = 0
-        entries = {}    # data from API
+        entries = {key: value for key, value in resp.json().items()}    # data from API
         stocks = {}     # data entries for each stock
         export = {}     # container of re-packaged data to be rendered
-
-        for key, value in resp.json().items():
-            entries[key] = value
 
     # build export dict for template
         export['dates'] = format_dates(entries['Dates'])
@@ -345,8 +342,8 @@ def build_graph(request, elements, percentage=False):
             if not shares:
                 shares = 0
 
-            total_shares += (shares)
-            total_value += (price) * (shares)
+            total_shares += shares
+            total_value += price * shares
 
             for i in range(len(y_vals)):
                 daily_totals[i] += (y_vals[i] * shares)

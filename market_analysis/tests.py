@@ -323,22 +323,3 @@ def test_build_stock_entry():
     from .views.default import build_stock_entry
     result = build_stock_entry([1, 2, 3], 30, 5, 150, 1, 0)
     assert result == {'y_values': [1, 2, 3], 'price': 30, 'shares': 5, 'value': 150, 'max': 1, 'min': 0}
-
-
-# can't connect to api
-# def test_details_error_sym(app, new_session):
-#     from .views.default import single_stock_details
-#     http_request = dummy_http_request(new_session)
-#     http_request.matchdict['sym'] = 'CSCODSR'
-#     result = single_stock_details(http_request)
-#     assert result == {'info': {}, 'msg': 'Bad request.'}
-
-
-# May return to this later
-# def test_details_error_resp_status(new_session):
-#     from .views.default import single_stock_details
-#     http_request = dummy_http_request(new_session)
-#     http_request.matchdict['sym'] = 'CSCO'
-#     result = single_stock_details(http_request)
-#     result.status_code = 404
-#     assert result == {'entry': {}, 'msg': 'Could not fulfill the request.'}
