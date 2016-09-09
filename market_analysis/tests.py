@@ -120,6 +120,7 @@ def test_search_stocks_GET(new_session, populated_db3):
 
 
 def test_add_new_stock_to_portfolio_msg(new_session, populated_db3):
+    """Test adding stock to portfolio message."""
     from .views.default import add_stock_to_portfolio
     http_request = dummy_http_request(new_session, 'POST')
     http_request.matchdict['name'] = 'Baidu, Inc.'
@@ -129,6 +130,7 @@ def test_add_new_stock_to_portfolio_msg(new_session, populated_db3):
 
 
 def test_add_existing_stock_to_portfolio_msg(new_session, populated_db3):
+    """Test msg for trying to add stock already present in portfolio."""
     from .views.default import add_stock_to_portfolio
     http_request = dummy_http_request(new_session, 'POST')
     http_request.matchdict['name'] = 'Activision Blizzard, Inc.'
@@ -139,6 +141,7 @@ def test_add_existing_stock_to_portfolio_msg(new_session, populated_db3):
 
 
 def test_add_new_stock_to_portfolio_db(new_session, populated_db3):
+    """Test stock was added to portfolio."""
     from .views.default import add_stock_to_portfolio
     http_request = dummy_http_request(new_session, 'POST')
     http_request.matchdict['name'] = 'Baidu, Inc.'
@@ -151,6 +154,7 @@ def test_add_new_stock_to_portfolio_db(new_session, populated_db3):
 
 
 def test_add_existing_stock_to_portfolio_db(new_session, populated_db3):
+    """Test stock not added."""
     from .views.default import add_stock_to_portfolio
     http_request = dummy_http_request(new_session, 'POST')
     http_request.matchdict['name'] = 'Activision Blizzard, Inc.'
@@ -163,6 +167,7 @@ def test_add_existing_stock_to_portfolio_db(new_session, populated_db3):
 
 
 def test_add_new_stock_to_portfolio_stock_id(new_session, populated_db3):
+    """Test new stock id is in portfolio."""
     from .views.default import add_stock_to_portfolio
     http_request = dummy_http_request(new_session, 'POST')
     http_request.matchdict['name'] = 'Baidu, Inc.'
@@ -178,6 +183,7 @@ def test_add_new_stock_to_portfolio_stock_id(new_session, populated_db3):
 
 
 def test_add_existing_stock_to_portfolio_stock_id(new_session, populated_db3):
+    """Test stock id not in portfolio twice."""
     from .views.default import add_stock_to_portfolio
     http_request = dummy_http_request(new_session, 'POST')
     http_request.matchdict['name'] = 'Activision Blizzard, Inc.'
@@ -193,6 +199,7 @@ def test_add_existing_stock_to_portfolio_stock_id(new_session, populated_db3):
 
 
 def test_del_stock_from_portfolio_msg(new_session, populated_db3):
+    """Test message of deleted stock."""
     from .views.default import delete_stock_from_portfolio
     http_request = dummy_http_request(new_session, 'POST')
     http_request.matchdict['sym'] = 'ATVI'
@@ -201,6 +208,7 @@ def test_del_stock_from_portfolio_msg(new_session, populated_db3):
 
 
 def test_del_stock_from_portfolio_db(new_session, populated_db3):
+    """Test stock was removed from portfolio."""
     from .views.default import delete_stock_from_portfolio
     user_id = 1
     http_request = dummy_http_request(new_session, 'POST')
@@ -212,6 +220,7 @@ def test_del_stock_from_portfolio_db(new_session, populated_db3):
 
 
 def test_del_stock_from_portfolio_stock_id(new_session, populated_db3):
+    """Test stock id not in portfolio."""
     from .views.default import delete_stock_from_portfolio
     user_id = 1
     http_request = dummy_http_request(new_session, 'POST')
@@ -226,6 +235,7 @@ def test_del_stock_from_portfolio_stock_id(new_session, populated_db3):
 
 
 def test_del_stock_from_portfolio_error_POST(new_session, populated_db3):
+    """Test message for removal error."""
     from .views.default import delete_stock_from_portfolio
     http_request = dummy_http_request(new_session, 'POST')
     http_request.matchdict['sym'] = 'ATVIVV'
@@ -235,6 +245,7 @@ def test_del_stock_from_portfolio_error_POST(new_session, populated_db3):
 
 
 def test_del_stock_from_portfolio_error_GET(new_session, populated_db3):
+    """Test message for improper GET request."""
     from .views.default import delete_stock_from_portfolio
     http_request = dummy_http_request(new_session, 'GET')
     http_request.matchdict['sym'] = 'ATVI'
@@ -243,6 +254,7 @@ def test_del_stock_from_portfolio_error_GET(new_session, populated_db3):
 
 
 def test_details_ok(new_session, populated_db3):
+    """Test result from single stock details function."""
     from .views.default import single_stock_details
     http_request = dummy_http_request(new_session)
     http_request.matchdict['sym'] = 'ATVI'
@@ -251,6 +263,7 @@ def test_details_ok(new_session, populated_db3):
 
 
 def test_update_shares(new_session, populated_db3):
+    """Test that shares are updated properly."""
     from .views.default import portfolio
     http_request = dummy_http_request(new_session, 'POST')
     http_request.POST['amount'] = 9
@@ -266,7 +279,9 @@ def test_update_shares(new_session, populated_db3):
                     Association.stock_id == 1)).first().shares
     assert query_after == 9
 
+
 def test_format_dates():
+    """Test function to format dates from API."""
     from .views.default import format_dates
     date_list = ['2016-08-26T00:00:00', '2016-08-29T00:00:00', '2016-08-30T00:00:00', '2016-08-31T00:00:00', '2016-09-01T00:00:00']
     new_list = format_dates(date_list)
@@ -274,6 +289,7 @@ def test_format_dates():
 
 
 def test_prepare_daily_changes():
+    """Test result of preparing daily changes."""
     from .views.default import prepare_daily_changes
     initial = [10, 100, 500]
     result = prepare_daily_changes(initial)
@@ -281,6 +297,7 @@ def test_prepare_daily_changes():
 
 
 def test_query_shares(new_session, populated_db3):
+    """Test query for shares."""
     from .views.default import query_shares
     http_request = dummy_http_request(new_session, 'POST')
     result = query_shares(http_request, 1, 'ATVI')
@@ -288,6 +305,7 @@ def test_query_shares(new_session, populated_db3):
 
 
 def test_build_stock_entry():
+    """Test format of stock entry for template."""
     from .views.default import build_stock_entry
     result = build_stock_entry([1, 2, 3], 30, 5, 150, 1, 0)
     assert result == {'y_values': [1, 2, 3], 'price': 30, 'shares': 5, 'value': 150, 'max': 1, 'min': 0}
