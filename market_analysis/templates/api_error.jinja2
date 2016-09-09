@@ -1,0 +1,5 @@
+{% extends "layout.jinja2" %}
+  {% block body %}
+  <h3>There was an error connecting to the API.</h3>
+  <a href="{{request.route_url('portfolio')}}">Back to portfolio.</a>
+  {% endblock %}

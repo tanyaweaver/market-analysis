@@ -1,0 +1,130 @@
+{% extends "layout.jinja2" %}
+{% block body %}   
+      <!--This is the User Home View-->
+      <!--User stocks and portfolio information will be listed here. The list will be populated from a postgres database.-->
+
+      <table class="table table-inverse">
+        <thead>
+                <tr class="bold">
+                  <th>Symbol</th>
+                  <th>%Change in Value</th>
+                  <th>Current Price</th>
+                  <th>Shares</th>
+                  <th>% Value of Portfolio</th>
+                  <th></th>
+                </tr>
+        </thead>
+          <tbody>
+            {% for stock in entry.stocks %}
+                        {% if stock == 'Total' %}
+                        {% else %}
+                              <tr>
+                                <td><a href="/details/{{ stock }}"><bold>{{ stock }}</bold></a></td>
+                                <td>{{ entry.stocks[stock].y_values[-1]}} %</td>
+                                <td>$ {{ entry.stocks[stock].price }}
+                                <td>
+                                    <form action="" method="POST">
+                                      <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
+                                      <input type="number" min="0" max="10000" name="amount" value="{{ entry.stocks[stock].shares }}">
+                                      <input class="update-btn" type="Submit" name="{{stock}}" value="Update"/>
+                                    </form>
+                                </td>
+                                            {% if entry.stocks[stock].shares > 0 %}
+                                            <td>{{ (entry.stocks[stock].value * 100 / entry.total_value)|round(3) }}</td>
+                                            {% else %}
+                                            <td>0</td>
+                                            {% endif %}
+                                <td>
+                                        <form action="/delete/{{stock}}" method="POST">
+                                          <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}"/>
+                                          <input id="colored-button" class="btn btn-default" type="Submit" name="delete_button" value="Delete"/>
+                                        </form>
+                                </td>
+                              </tr>
+                        {% endif %}
+            {% endfor %}
+            <tr>
+              <td>Total</td>
+              {% if entry.stocks['Total'].shares > 0 %}
+              <td>{{ entry.stocks['Total'].y_values[-1]}} %</td>
+              {% else %}
+              <td>---</td>
+              {% endif %}
+              <td>$ {{ entry.stocks['Total'].price|round(2) }}</td>
+              <td>{{ entry.stocks['Total'].shares }}</td>
+                      {% if entry.stocks['Total'].shares > 0 %}
+                      <td>{{ (entry.stocks['Total'].value * 100 / entry.total_value)|round(3) }}</td>
+                      {% else %}
+                      <td></td>
+                      {% endif %}
+              <td></td>
+            </tr>            
+          </table>
+          <span class="bold">Total Value of Portfolio: {{ entry.total_value|round(2) }} USD</span>
+  
+
+          <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+          <script type="text/javascript">
+                  google.charts.load('current', {packages: ['corechart', 'line']});
+                  google.charts.setOnLoadCallback(drawCrosshairs);
+
+
+              function drawCrosshairs() {
+                var t = 0;
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'X');
+              {% for stock in entry.stocks %}
+                data.addColumn('number', '{{ stock }}');
+              {% endfor %}
+                rowData = [];
+              {% for date in entry.dates %}
+                rowData.push(['{{ date }}']);
+              {% endfor %}
+
+              var s = {};
+              for (i = 0; i < data['Kf'].length; i++) {
+                if (data['Kf'][i].label == 'Total') {
+                  t = i - 1;
+                  // t = t.toString();
+                  s[t] = { lineDashStyle: [14, 2, 7, 2] };
+                }
+              }
+
+              for (i = 0; i < rowData.length; i++) {
+                  {% for stock, val in entry.stocks.items() %}
+                      rowData[i].push({{val.y_values}}[i]);
+                  {% endfor %}
+              };
+
+              data.addRows(rowData)
+              
+              var options = {
+                hAxis: {
+                  title: 'Time'
+                },
+                vAxis: {
+                  title: 'Percent Change (%)',
+                  format:'0.000'
+                },
+                title: 'Your Portfolio - Percent Change',
+                pointSize: 8,
+                height: 400,
+                crosshair: {
+                  color: '#000',
+                  trigger: 'selection'
+                },
+                series: s
+              };
+
+
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+                chart.draw(data, options);
+                chart.setSelection([{row: 38, column: 1}]);
+
+              }
+          </script>
+
+              <div id="chart_div"></div>
+
+{% endblock %}
