@@ -115,8 +115,8 @@ html {
 }
 
 .input-group-addon {
-  min-width:60px;  // if you want width please write here //
-  text-align:left;
+  min-width: 12em;  // if you want width please write here //
+  text-align: left;
 }
 
 .container {

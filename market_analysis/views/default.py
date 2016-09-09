@@ -90,19 +90,6 @@ def delete_stock_from_portfolio(request):
     return {'msg': msg}
 
 
-@view_config(route_name='private',
-             renderer='string',
-             permission='secret')
-def private(request):
-    return "I'm a private view."
-
-
-@view_config(route_name='public', renderer='string',
-             permission='view')
-def pubic(request):
-    return "I'm a public page"
-
-
 @view_config(route_name='portfolio', renderer="../templates/portfolio.jinja2",
              permission='secret')
 def portfolio(request):
@@ -142,6 +129,26 @@ def portfolio(request):
         return build_graph(request, elements, True)
 
 
+def package_data(info, entries, msg):
+    """Package data for single_stock_details."""
+    try:
+        info['info'] = entries
+        info['msg'] = msg
+    except TypeError:
+        info = {}
+        info['info'] = entries
+        msg = 'Trouble connecting to API.'
+        info['msg'] = msg
+    return info
+
+
+def check_bad_msg(entries):
+    """Return True if bad request."""
+    if 'Message' in entries.keys():
+        return True
+    return False
+
+
 @view_config(route_name='details', renderer="../templates/details.jinja2",
                         permission="secret")
 def single_stock_details(request):
@@ -154,30 +161,23 @@ def single_stock_details(request):
                         'Api/v2/Quote/json?symbol=' + sym)
     if resp.status_code == 200:
         entries = {key: value for key, value in resp.json().items()}
-        if 'Message' in entries.keys():
+        if check_bad_msg(entries):
             msg = 'Bad request.'
-            entries = {}
         elements.append({'Symbol': str(sym), 'Type': 'price', 'Params': ['c']})
     else:
-        entries = {}
         msg = 'Could not fulfill the request.'
     temp = build_graph(request, elements)
-    try:
-        temp['info'] = entries
-        temp['msg'] = msg
-    except TypeError:
-        temp = {}
-        temp['info'] = entries
-        msg = 'Trouble connecting to API.'
-        temp['msg'] = msg
+    temp = package_data(temp, entries, msg)
     return temp
 
 
 @view_config(route_name='admin', renderer="../templates/admin.jinja2",
              permission='admin')
 def admin(request):
-    '''A page to display a users information to the site adimn and allow
-        them to change and update user information, or remove user'''
+    '''
+    A page to display a users information to the site adimn and allow
+    them to change and update user information, or remove user.
+    '''
     message = user_to_delete = ''
     if request.method == 'POST':
         if (request.POST['username'] != 'DELETE_ME_NOW') and \
@@ -187,7 +187,6 @@ def admin(request):
                       .format(username)
             request.session['user_to_delete'] = username
         elif request.POST['username'] == 'DELETE_ME_NOW':
-            # TODO: add a check so the admin user cannot be deleted
             username = request.session['user_to_delete']
             query = request.dbsession.query(Users)\
                 .filter(Users.username == username).first()
@@ -199,7 +198,7 @@ def admin(request):
     try:
         query = request.dbsession.query(Users)
         users = query.all()
-    except DBAPIError:
+    except DBAPIError:  # pragma: no cover
         return Response(db_err_msg, content_type='text/plain', status=500)
 
     return {'users': users,
@@ -249,6 +248,7 @@ def logout(request):
     headers = forget(request)
     return HTTPFound(request.route_url('login'), headers=headers)
 
+
 @view_config(route_name='api_error', renderer='templates/api_error.jinja2')
 def api_error(request):
     """Display a page with an error msg when can't connect to api."""
@@ -261,16 +261,6 @@ def format_dates(date_list):
     for date in date_list:
         date = date[5:10]
         ret_list.append(date)
-    return ret_list
-
-
-def convert_to_percentage(y_vals):
-    """Convert a list of y_values to be percentage based first val."""
-    initial = y_vals[0]
-    ret_list = []
-    for val in y_vals:
-        val = round((val / initial - 1) * 100, 5)
-        ret_list.append(val)
     return ret_list
 
 
@@ -296,10 +286,18 @@ def query_shares(request, user_id, symbol):
     return int(shares)
 
 
+def build_stock_entry(
+        y_values, price, shares, value, max_num=None, min_num=None
+        ):
+    """Build a stock entry to be returned to build graph."""
+    return {'y_values': y_values, 'price': price, 'shares': shares,
+            'value': value, 'max': max_num, 'min': min_num}
+
+
 def build_graph(request, elements, percentage=False):
-    """Build and return the graph data from an API request."""
+    """Build and return the graph data from an API request for rendering."""
     url = 'http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json'
-    req_obj = {
+    req_obj = {     # parameters for API request
         "parameters":
         {
             'Normalized': 'false',
@@ -308,24 +306,20 @@ def build_graph(request, elements, percentage=False):
             'Elements': elements
         }
     }
-    total_shares = 0
-    total_value = 0
-
     resp = requests.get(url, params=urlencode(req_obj))
 
     if resp.status_code == 200:
-
-        entries = {}
-        for key, value in resp.json().items():
-            entries[key] = value
+        total_shares = 0
+        total_value = 0
+        entries = {key: value for key, value in resp.json().items()}    # data from API
+        stocks = {}     # data entries for each stock
+        export = {}     # container of re-packaged data to be rendered
 
     # build export dict for template
-        export = {}
         export['dates'] = format_dates(entries['Dates'])
         export['x_values'] = entries['Positions']
         daily_totals = [0 for j in range(len(export['x_values']))]
 
-        stocks = {}
         current_user_id = request.dbsession.query(Users).filter(
             Users.username == request.authenticated_userid
         ).first().id
@@ -339,45 +333,35 @@ def build_graph(request, elements, percentage=False):
             if not shares:
                 shares = 0
 
-            total_shares += (shares)
-            total_value += (price) * (shares)
+            total_shares += shares
+            total_value += price * shares
 
             for i in range(len(y_vals)):
                 daily_totals[i] += (y_vals[i] * shares)
 
             if percentage:
-                y_vals = convert_to_percentage(y_vals)
+                y_vals = prepare_daily_changes(y_vals)
 
-            stocks[series['Symbol']] = {
-                'y_values': y_vals,
-                'price': price,
-                'max': series['DataSeries']['close']['max'],
-                'min': series['DataSeries']['close']['min'],
-                'shares': shares,
-                'value': price * shares,
-            }
-
-        daily_change = prepare_daily_changes(daily_totals)
+            stocks[series['Symbol']] = build_stock_entry(
+                                    y_vals, price, shares, (price * shares),
+                                    series['DataSeries']['close']['max'],
+                                    series['DataSeries']['close']['min']
+                                    )
 
         if percentage:
-            stocks['Total'] = {
-                'y_values': daily_change,
-                'price': round(total_value, 2),
-                'shares': total_shares,
-                'value': round(total_value, 2),
-            }
+            daily_change = prepare_daily_changes(daily_totals)
+            stocks['Total'] = build_stock_entry(
+                                    daily_change, round(total_value, 2),
+                                    total_shares, round(total_value, 2)
+                                    )
 
         export['stocks'] = stocks
         export['total_shares'] = total_shares
         export['total_value'] = round((total_value), 2)
 
-        print('export:', export)
         return {'entry': export}
 
     else:
-        print('Error connecting to API')
-        print(resp.status_code)
-
         return HTTPFound(request.route_url('api_error'))
 
 
@@ -399,7 +383,7 @@ def new_user(request):
         try:
             query = request.dbsession.query(Users)
             result = query.filter_by(username=username).first()
-        except DBAPIError:
+        except DBAPIError:  # pragma: no cover
             return Response(db_err_msg, content_type='text/plain', status=500)
 
         if result:
@@ -434,7 +418,7 @@ def new_user(request):
                                      headers=headers)
                 else:
                     error = 'Passwords do not match or password'\
-                            'is less then 6 characters'
+                            ' is less than 6 characters'
             else:
                 error = 'Missing Required Fields'
 
