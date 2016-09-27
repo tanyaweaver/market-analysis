@@ -72,6 +72,7 @@
               function drawCrosshairs() {
                 var t = 0;
                 var data = new google.visualization.DataTable();
+                console.log('data first:', data)
                 data.addColumn('string', 'X');
               {% for stock in entry.stocks %}
                 data.addColumn('number', '{{ stock }}');
@@ -80,10 +81,10 @@
               {% for date in entry.dates %}
                 rowData.push(['{{ date }}']);
               {% endfor %}
-
+              console.log('data second:', data)
               var s = {};
-              for (i = 0; i < data['Kf'].length; i++) {
-                if (data['Kf'][i].label == 'Total') {
+              for (i = 0; i < data['Sf'].length; i++) {
+                if (data['Sf'][i].label == 'Total') {
                   t = i - 1;
                   // t = t.toString();
                   s[t] = { lineDashStyle: [14, 2, 7, 2] };
