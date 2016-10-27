@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+            <meta name="description" content="">
+            <meta name="author" content="">
+            <link rel="icon" href="../../favicon.ico">
+
+            <title>Stock Watch</title>
+
+            <!-- Bootstrap core CSS -->
+            <link rel="stylesheet" href="{{ request.static_path('market_analysis:static/bootstrap_dist/css/bootstrap.min.css') }}">
+
+
+            <!-- Custom styles for this template -->
+            <link href="{{ request.static_path('market_analysis:static/style.css') }}" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css?family=Muli|Orbitron|Oswald|Monoton" rel="stylesheet">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+
+  <body>
+
+              <div class="container">
+                <!-- Static navbar -->
+                <nav class="navbar navbar-default navbar-fixed-top">
+                  <div class="container">
+                    <div class="navbar-header">
+                      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                      </button>
+                                {% if request.authenticated_userid %}
+                                      <a class="navbar-brand" id="logo-small">stoc<span class="span1">K</span><span class="span2">watch</span></a>
+                                {% endif %}
+                    </div>
+
+                    <div id="navbar" class="navbar-collapse collapse">
+                          <ul class="nav navbar-nav">
+                                {% if request.authenticated_userid %}
+                                      <li ><a href="{{request.route_url('portfolio')}}">Portfolio</a></li>
+                                      <li ><a href="{{request.route_url('search')}}">Search</a></li>
+                                {% endif %}
+                          </ul>
+
+                          <ul class="nav navbar-nav navbar-right">
+                                {% if request.authenticated_userid == 'admin' %}
+                                      <li><a href="{{request.route_url('admin')}}">Admin</a></li>
+                                      <li><a href="{{request.route_url('logout')}}">Logout</a></li>
+                                {% elif request.authenticated_userid %}
+                                      <li><a>Welcome, {{ request.authenticated_userid }}!</a></li>
+                                      <li><a href="{{request.route_url('logout')}}">Logout</a></li>
+                                {% else %}
+                                      <li><a href="{{request.route_url('login')}}">Log In</a></li>
+                                      <li><a href="{{request.route_url('new_user')}}">New User</a></li>
+                                {% endif %}
+                                    <li><a href="{{request.route_url('about')}}">About</a></li>
+                          </ul>
+
+                    </div><!--/.nav-collapse -->
+                  </div>
+                </nav>
+              </div> <!-- close container -->
+
+              <div class="container" id="content">
+                {% block body %}{% endblock %}
+              </div>  <!-- /container -->
+
+                <footer class="panel-footer">
+                  <p class="text-muted">TDD Development | Code Fellows 401: Advanced Software Development in Python | Powered by <a href="http://dev.markitondemand.com/MODApis/">markIt on demand API</a></p>
+                </footer>
+
+
+            <!-- Bootstrap core JavaScript
+            ================================================== -->
+            <!-- Placed at the end of the document so the pages load faster -->
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+            <script src="../static/bootstrap_dist/js/bootstrap.min.js"></script>
+            <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+            <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+</body>
+
+</html>

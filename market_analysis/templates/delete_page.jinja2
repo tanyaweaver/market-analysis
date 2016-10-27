@@ -1,0 +1,12 @@
+{% extends "layout.jinja2" %}
+  {% block body %}
+
+<div class="message-page">
+
+    <h3> {{ msg }}</h3>
+    <a href="{{request.route_url('portfolio')}}">Back to Portfolio</a>
+
+<div>
+         
+  {% endblock %}
+
